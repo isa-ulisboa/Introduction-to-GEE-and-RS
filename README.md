@@ -5,7 +5,7 @@ Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18
 
 ---
 
-Plase fill answer to the following [questionnaire](https://docs.google.com/forms/d/e/1FAIpQLSfg-rdXgLgX6V4vZBF4SmMhzRBe7LSrYnyreAGjtIijV1RAJA/viewform?usp=sf_link). 
+Please answer to the following [questionnaire](https://docs.google.com/forms/d/e/1FAIpQLSfg-rdXgLgX6V4vZBF4SmMhzRBe7LSrYnyreAGjtIijV1RAJA/viewform?usp=sf_link). 
 
 Before the tutorial, you should sign up for:
   - [Google Colab](https://colab.research.google.com/)
