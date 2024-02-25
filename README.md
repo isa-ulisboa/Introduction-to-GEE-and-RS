@@ -1,7 +1,9 @@
 # remote-sensing-processing
 
 Fonda Spring School at Universidade de Aveiro 
+
 Tutorial on *Land-use and vegetation* (March 6, 2024)
+
 Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18-3B3C-06BB)
 
 ---
