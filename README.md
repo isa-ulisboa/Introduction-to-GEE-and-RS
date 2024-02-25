@@ -10,9 +10,7 @@ Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18
 
 Please answer to the following [questionnaire](https://docs.google.com/forms/d/e/1FAIpQLSfg-rdXgLgX6V4vZBF4SmMhzRBe7LSrYnyreAGjtIijV1RAJA/viewform?usp=sf_link) to assess your familiarity with remote sensing data and processing.
 
-Before the tutorial, please sign up for:
-  - [Google Colab](https://colab.research.google.com/)
-  - [Google Earth Engine](https://code.earthengine.google.com/)
+Before the tutorial, please sign up for [Google Earth Engine](https://code.earthengine.google.com/).
 
 ---
 
