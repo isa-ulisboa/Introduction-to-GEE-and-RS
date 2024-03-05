@@ -14,4 +14,4 @@ Before the tutorial, please sign up for [Google Earth Engine](https://code.earth
 
 ---
 
-More information about the tutorial will be available soon.
+The tutorial will be *hands-on* using the GEE code editor. The [guideline](tutorial_v1.pdf) for the tutorial is a selection of pages from [https://developers.google.com/earth-engine](https://developers.google.com/earth-engine) where one can find code descriptions and examples that illustrate topics like finding and filtering data (spatially, temporally and spectrally), visualizing images, creating charts, creating new images and bands, and exporting data.
