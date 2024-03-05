@@ -2,7 +2,7 @@
 
 Fonda Spring School at Universidade de Aveiro 
 
-Tutorial on *Land-use and vegetation* using Google Earth Engine (March 6, 2024)
+Tutorial on remote sensing for *Land-use and vegetation* using the Google Earth Engine (March 6, 2024)
 
 Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18-3B3C-06BB)
 
