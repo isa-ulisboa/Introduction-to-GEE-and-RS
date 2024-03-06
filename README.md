@@ -1,5 +1,3 @@
-# remote-sensing-processing
-
 Fonda Spring School at Universidade de Aveiro 
 
 Tutorial on remote sensing for *Land-use and vegetation* using the Google Earth Engine (March 6, 2024)
