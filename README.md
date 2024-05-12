@@ -1,6 +1,6 @@
-Academia Terra 
+**Academia Terra**
 
-Tutorial on Introduction the Google Earth Engine for  monitoring the environment (May 14, 2024)
+Tutorial: Introduction to the Google Earth Engine for  monitoring the environment (May 14, 2024)
 
 Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18-3B3C-06BB)
 
