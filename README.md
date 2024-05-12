@@ -1,12 +1,14 @@
 **Academia Terra**
 
-Tutorial: Introduction to the Google Earth Engine for  monitoring the environment (May 14, 2024)
+Tutorial: Introduction to the Google Earth Engine for monitoring the environment (May 14, 2024)
 
 Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18-3B3C-06BB)
 
 ---
 
 Before the tutorial, please sign up for [Google Earth Engine](https://code.earthengine.google.com/).
+
+Data set to upload to GEE: Município de Alcoutim from CAOP 2023 in shapefile format [Alcoutim.zip](alcoutim.zip)
 
 ---
 
