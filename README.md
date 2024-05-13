@@ -71,16 +71,19 @@ Map.addLayer(S2, {bands: ['B8', 'B4', 'B3'], min: 0, max: 3000}, 'Sentinel-2 lev
 </details>
 
 
-### Create single image
+### Create single image and select bands
 <details>
   <summary> Select images with low cloud cover and combine them into a single image </summary>
 
 The idea is to filter the Sentinel-2 image collection using the property `CLOUDY_PIXEL_PERCENTAGE`. Only images with less than 1% cloud cover are selected. Then selected images are combined with a *temporal reducer* which can be for instance the `mean` or the `median`.
 
 ```
-// access image collection, filter for location and range of dates
+// First, import 'alcoutim'
+
+// access image collection, select 10 m bands, filter for location and range of dates
 // sort by percentage of clouds (most cloudier first)
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+                .select(['B2','B3','B4','B8'])
                 .filterBounds(alcoutim)
                 .filterDate('2023-06-01', '2023-08-31')
 
@@ -90,7 +93,7 @@ var filtered = S2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 1));
 // reduce image collection to image
 var S2clear=filtered.median()
 
-// Clip using feature collection
+// clip image using feature collection, just for visualization
 var S2alcoutim=S2clear.clip(alcoutim)
 
 // Center map
@@ -102,7 +105,7 @@ Map.addLayer(S2alcoutim, {bands: ['B8', 'B4', 'B3'], min: 0, max: 3000}, 'Sentin
 // print to console
 print(S2alcoutim);
 
-// Add Alcotim to the map
+// Add Alcotim to the map 
 Map.addLayer(alcoutim, {color: 'gray'}, 'Alcoutim');
 ```
 
@@ -131,14 +134,13 @@ var vizParams = {
 };
 
 // add layer
-Map.addLayer(S2alcoutim, vizParams, 'Sentinel-2 level 2A');
+Map.addLayer(S2alcoutim, vizParams, 'S2 Alcoutim, opacity=0.7');
 ```
 
-If one wants to visualize only the pixels that satisfy some particular condition, one can use method `updateMask` as in the following example, where we look at pixels that have a very low reflectance in the near infrared (nir) which corresponds to band 8 in Sentinel-2. The idea is to create a new image `nir` with only that band using method `select('B8')` and then visualize only pixels in `nir` that satisfy the condition ${\rm nir} < 800$, i.e. reflectance below 0.08%.
+If one wants to visualize only the pixels that satisfy some particular condition, one can use method `updateMask` as in the following example, where we look at pixels that have a very low reflectance in the near infrared (nir) which corresponds to band 8 in Sentinel-2. The idea is to create a new image `nir` with only that band using method `select('B8')` and then visualize only pixels in `nir` that satisfy the condition ${\rm nir} < 800$, i.e. reflectance below 8%.
 
 ```
-// Add Alcotim to the map
-Map.addLayer(alcoutim, {color: 'gray', opacity: 0.3}, 'Alcoutim');
+// Extra lines of script to create a map of low NIR values (water bodies)
 
 // create new image with just one band
 var nir = S2alcoutim.select('B8');
@@ -147,9 +149,9 @@ var nir = S2alcoutim.select('B8');
 var nirMasked = nir.updateMask(nir.lt(800));
 
 // This palette indicates the colors associated to the minimum and maximum values
-var vizNir={min:0, max: 800, palette: ['00FFFF', '0000FF']};
+var vizNir={min:0, max: 800, palette: ['00FFFF', '0000FF']}; // cyan to blue
 
-// Visualize nirMasked
+// Visualize nirMasked so pixels with NIR close to zero are shown in cyan and pixels with NIR close to 8% are showed in blue
 Map.addLayer(nirMasked, vizNir, 'NIR masked');
 ```
 </details>
@@ -158,33 +160,26 @@ Map.addLayer(nirMasked, vizNir, 'NIR masked');
 <details>
   <summary> Create an index with normalized difference </summary>
 
-In remote sensing, it is very common to use an operation called *normalized difference* between two bands to compute an index. The most well-known index is the NDVI which measures the *greenness* of the land cover. Here, we are going to create an index that, hopefully, will allow us to discriminate solar panels from other land cover types. Towards that end, we consider bands `B2` and `B3` from which we compute the new band `ndgb`. We could created it with an expression  or just use the *normalized difference* operation available in GEE (see [https://developers.google.com/earth-engine/apidocs/ee-image-normalizeddifference](https://developers.google.com/earth-engine/apidocs/ee-image-normalizeddifference)).
+In remote sensing, it is very common to use an operation called *normalized difference* between two bands to compute an index. The most well-known index is the NDVI which measures the *greenness* of the land cover. Here, we also create an index that will help discriminate solar panels from other land cover types. Towards that end, we consider bands `B2` and `B3` from which we compute the new band `ndgb`. 
+
+We could created those indices with an expression or we can simply use the *normalized difference* operation available in GEE (see [https://developers.google.com/earth-engine/apidocs/ee-image-normalizeddifference](https://developers.google.com/earth-engine/apidocs/ee-image-normalizeddifference)).
 
 ```
+// Create new images for NDGB and NDVI: notice that values are between -1 and 1.
 var ndgb = S2alcoutim.normalizedDifference(['B3', 'B2']).rename('NDGB');
+var ndvi = S2alcoutim.normalizedDifference(['B8', 'B4']).rename('NDVI');
 
-S2alcoutim = S2alcoutim.addBands([ndgb]).select(['B2','B3','B4','B8','NDGB'])
+S2alcoutim = S2alcoutim.addBands([ndgb,ndvi]).select(['B2','B3','B4','B8','NDGB','NDVI'])
 
-print(S2alcoutim)
+var maskSP=S2alcoutim.select('NDGB').lt(0.1).and(S2alcoutim.select('B2').lt(1100))
+var maskSP=S2alcoutim.select('B8').gt(1000)
+          .and(S2alcoutim.select('B3').lt(1150))
+          .and(S2alcoutim.select('B8').lt(1800))
+          .and(S2alcoutim.select('NDGB').lt(0.13))
+          .and(S2alcoutim.select('NDVI').lt(0.15))
 
-var vizParams={bands: ['NDGB'],min: 0, max: 1}
-
-Map.addLayer(S2alcoutim, vizParams, 'Sentinel-2 level 2A');
-
-// é preciso também limitar a banda B2 a ser inferior a ~1100 pois estradas tendem a ter uma reflectância maior em B2
-// é preciso relazar 0.08 para ~0.1 pois os paineis solares a norte estão mais espaçados
-
-
-// Update mask so only pixels with value below 800 are not masked
-var ndgbMasked = ndgb.updateMask(ndgb.lte(0.08));
-
-// This palette indicates the colors associated to the minimum and maximum values
-var vizNDGB={min:0, max: 0.08, palette: ['00FFFF', '0000FF']};
-
-Map.addLayer(ndgbMasked, vizNDGB, 'NDGB masked');
-
-
-
+var vizParams={bands: ['B2','B3','B8'], min:0, max: [1150,1150,1800]}
+Map.addLayer(S2alcoutim.updateMask(maskSP), vizParams , 'Solar Panels');
 ```
 
 </details>
