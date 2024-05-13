@@ -81,7 +81,6 @@ The idea is to filter the Sentinel-2 image collection using the property `CLOUDY
 // First, import 'alcoutim'
 
 // access image collection, select 10 m bands, filter for location and range of dates
-// sort by percentage of clouds (most cloudier first)
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                 .select(['B2','B3','B4','B8'])
                 .filterBounds(alcoutim)
@@ -96,17 +95,15 @@ var S2clear=filtered.median()
 // clip image using feature collection, just for visualization
 var S2alcoutim=S2clear.clip(alcoutim)
 
-// Center map
+// center map
 Map.centerObject(S2, 11);
 
+// simple set of parameters for visualization
+var vizParams={bands: ['B8', 'B4', 'B3'], min: 0, max: 3000}
+
 // add layer
-Map.addLayer(S2alcoutim, {bands: ['B8', 'B4', 'B3'], min: 0, max: 3000}, 'Sentinel-2 level 2A');
+Map.addLayer(S2alcoutim, vizParams, 'Sentinel-2 level 2A');
 
-// print to console
-print(S2alcoutim);
-
-// Add Alcotim to the map 
-Map.addLayer(alcoutim, {color: 'gray'}, 'Alcoutim');
 ```
 
 ![Alt text](https://developers.google.com/static/earth-engine/images/Reduce_ImageCollection.png "Image collection reduction")
@@ -118,11 +115,11 @@ Suggestions:
 
 </details>
 
-### Image vizualization
+### Image vizualization and masking
 <details>
-  <summary> Additional parameters for image visualization </summary>
+  <summary> Additional parameters for image visualization; updateMask; palette </summary>
 
-As described in  [https://developers.google.com/earth-engine/guides/image_visualization](https://developers.google.com/earth-engine/guides/image_visualization) there are many parameters for visualizaton. Many of them accept a single value to be applied to all bands, or a list of three values to be applied to the RGB bands. Typically, one creates a *dictionary* of parameters and then used it with `Map.addLayer()` or with `image.visualize()`.
+As described in  [https://developers.google.com/earth-engine/guides/image_visualization](https://developers.google.com/earth-engine/guides/image_visualization) there are many parameters for visualizaton. Some of them accept a single value to be applied to all bands, or a list of three values to be applied to the RGB bands. Typically, one creates a *dictionary* of parameters and then used it with `Map.addLayer()` or with `image.visualize()`.
 
 ```
 // Define the visualization parameters.
@@ -134,63 +131,103 @@ var vizParams = {
 };
 
 // add layer
-Map.addLayer(S2alcoutim, vizParams, 'S2 Alcoutim, opacity=0.7');
+Map.addLayer(S2alcoutim, vizParams, 'S2 Alcoutim');
 ```
 
-If one wants to visualize only the pixels that satisfy some particular condition, one can use method `updateMask` as in the following example, where we look at pixels that have a very low reflectance in the near infrared (nir) which corresponds to band 8 in Sentinel-2. The idea is to create a new image `nir` with only that band using method `select('B8')` and then visualize only pixels in `nir` that satisfy the condition ${\rm nir} < 800$, i.e. reflectance below 8%.
+If one wants to **visualize only the pixels that satisfy some particular condition**, one can use method `updateMask` as in the following example, where we look at pixels that have a very low reflectance in the near infrared (nir) which corresponds to band 8 in Sentinel-2. The idea is to create a new image `nir` with only that band using method `select('B8')` and then visualize only pixels in `nir` that satisfy the condition ${\rm nir} < 800$, i.e. reflectance below 8%.
 
 ```
 // Extra lines of script to create a map of low NIR values (water bodies)
-
 // create new image with just one band
 var nir = S2alcoutim.select('B8');
 
 // Update mask so only pixels with value below 800 are not masked
-var nirMasked = nir.updateMask(nir.lt(800));
+var nirLow = nir.updateMask(nir.lt(800));
 
 // This palette indicates the colors associated to the minimum and maximum values
 var vizNir={min:0, max: 800, palette: ['00FFFF', '0000FF']}; // cyan to blue
 
 // Visualize nirMasked so pixels with NIR close to zero are shown in cyan and pixels with NIR close to 8% are showed in blue
-Map.addLayer(nirMasked, vizNir, 'NIR masked');
+Map.addLayer(nirLow, vizNir, 'NIR below 8% (water bodies)');
 ```
 </details>
 
-### Create a new band and add it to the image
+### Create a new band and add it to the image; create mask from bands
 <details>
-  <summary> Create an index with normalized difference </summary>
+  <summary> Create an index with normalized difference; add index to image bands; create and apply mask for solar panels</summary>
 
 In remote sensing, it is very common to use an operation called *normalized difference* between two bands to compute an index. The most well-known index is the NDVI which measures the *greenness* of the land cover. Here, we also create an index that will help discriminate solar panels from other land cover types. Towards that end, we consider bands `B2` and `B3` from which we compute the new band `ndgb`. 
 
 We could created those indices with an expression or we can simply use the *normalized difference* operation available in GEE (see [https://developers.google.com/earth-engine/apidocs/ee-image-normalizeddifference](https://developers.google.com/earth-engine/apidocs/ee-image-normalizeddifference)).
 
 ```
-// Create new images for NDGB and NDVI: notice that values are between -1 and 1.
+// create new images for NDGB and NDVI: notice that values are between -1 and 1.
 var ndgb = S2alcoutim.normalizedDifference(['B3', 'B2']).rename('NDGB');
 var ndvi = S2alcoutim.normalizedDifference(['B8', 'B4']).rename('NDVI');
 
-S2alcoutim = S2alcoutim.addBands([ndgb,ndvi]).select(['B2','B3','B4','B8','NDGB','NDVI'])
+// add band to image
+S2alcoutim = S2alcoutim.addBands([ndgb,ndvi])
 
-var maskSP=S2alcoutim.select('NDGB').lt(0.1).and(S2alcoutim.select('B2').lt(1100))
+// create mask from bands
 var maskSP=S2alcoutim.select('B8').gt(1000)
-          .and(S2alcoutim.select('B3').lt(1150))
+          .and(S2alcoutim.select('B3').lt(1250))
           .and(S2alcoutim.select('B8').lt(1800))
           .and(S2alcoutim.select('NDGB').lt(0.13))
           .and(S2alcoutim.select('NDVI').lt(0.15))
 
-var vizParams={bands: ['B2','B3','B8'], min:0, max: [1150,1150,1800]}
+// define visualization parameters so the color depends on the value of B3, ranging from red (B3=0) to brown (B3=1250)
+var vizParams={bands: ['B3'], min:500, max: 1250, palette: ['FF0000', '964B00']} // red and brown
+// Instead of adding the whole S2alcoutim image, this masks the pixels in maskSP first
 Map.addLayer(S2alcoutim.updateMask(maskSP), vizParams , 'Solar Panels');
+
 ```
 
 </details>
 
-# Create temporal composite
+### Create Feature Collection with one point feature per solar farm
 <details>
-  <summary> ... </summary>
+  <summary> Usar `Geometry Imports` </summary>
 
+```
+var solar_farms = ee.FeatureCollection([
+        ee.Feature(ee.Geometry.Point([-7.581315725226887, 37.44977560189899]),{name: 'vicentes', color: 'blue'}),
+        ee.Feature(ee.Geometry.Point([-7.613073079963215, 37.449980021136575]),{name: 'pereiro', color: 'yellow'}),
+        ee.Feature(ee.Geometry.Point([-7.693075049521815, 37.383792590263845]),{name: 'zambujal', color: 'green'}),
+        ee.Feature(ee.Geometry.Point([-7.673361113945973, 37.45563071528393]),{name: 'viçoso', color: 'red'}),
+        ee.Feature(ee.Geometry.Point([-7.715182889197569, 37.41416981246133]),{name: 'santa_justa', color: 'brown'}),
+        ee.Feature(ee.Geometry.Point([-7.537620761881514, 37.45729422065703]),{name: 'corte', color: 'purple'}),
+        ]);
+```
+
+**Advanced**: let's create a layer per location, and use the properties `name` and `color` for each layer. 
+
+```
+// Map over the feature collection to extract geometry, name and color properties
+var featureList = solar_farms.toList(solar_farms.size());
+var geometries = featureList.map(function(feature) {
+  return ee.Feature(feature).geometry();
+});
+var names = featureList.map(function(feature) {
+  return ee.Feature(feature).get('name');
+});
+var colors = featureList.map(function(feature) {
+  return ee.Feature(feature).get('color');
+});
+// Iterate over geometries and names
+for (var i = 0; i < geometries.length().getInfo(); i++) {
+  // Get the geometry and name for the current iteration
+  var geometry = ee.Geometry(geometries.get(i));
+  var nome = names.get(i).getInfo();
+  var color = colors.get(i).getInfo();
+  // Create a point feature using the geometry
+  var point = ee.Feature(geometry, {'name' : nome});
+  // Add the point layer to the map with the name as the layer label
+  Map.addLayer(point, {color: color}, nome);
+}
+```
 </details>
 
-# Create temporal composite
+### Create a temporal chart for the NDVI at each location
 <details>
   <summary> ... </summary>
 
