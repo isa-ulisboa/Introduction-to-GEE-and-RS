@@ -14,7 +14,32 @@ Data set to upload to GEE: Município de Alcoutim from CAOP 2023 in shapefile fo
 
 The tutorial will be *hands-on* using the GEE code editor. The [guideline](tutorial.pdf) for the tutorial is a selection of pages from [https://developers.google.com/earth-engine](https://developers.google.com/earth-engine) where one can find code descriptions and examples that illustrate topics like finding and filtering data (spatially, temporally and spectrally), visualizing images, creating charts, creating new images and bands, and exporting data.
 
+The GEE is one of several available **geospatial processing services** ofering a public data catalog, compute infrastructure and geospatial APIs:
+1. Google Earth Engine (Google Cloud)
+2. Microsoft Planetary Computer (Azure)
+3. Amazon Web Services (AWS) GeoSpatial Services
+4. Copernicus Data Space Ecosystem, mostly for Sentinel imagery
+5. ...
 
+In this tutorial we will focus on the **GEE code editor**, which just requires a browser and do not require installing any other software in the local machine. Scripts are written in *javascript* in the code editor and personnal data can either be stored in the user's Earth Engine account (up to 250 Mb) or in Google drive.
+
+The code editor is available at https://code.earthengine.google.com 
+![Alt text](https://developers.google.com/static/earth-engine/images/Code_editor_diagram.png "Code editor")
+
+The sections of the Google Earth Engine documentation that are the most relevant for this tutorial are:
+- https://developers.google.com/earth-engine/guides/getstarted
+- https://developers.google.com/earth-engine/guides/playground (intro to code editor) 
+- https://developers.google.com/earth-engine/guides/getstarted#earth-engine-data-structures (image and feature data structures)
+- https://developers.google.com/earth-engine/guides/getstarted#finding-images,-image-collections-and-feature-collections (finding collections and images)
+- https://developers.google.com/earth-engine/guides/image_overview (image and image collection)
+- https://developers.google.com/earth-engine/guides/ic_reducing (reducing an image collection)
+- https://developers.google.com/earth-engine/tutorials/tutorial_api_05?hl=en#masking (masking an image)
+- https://developers.google.com/earth-engine/guides/image_visualization (image visualization)
+- https://developers.google.com/earth-engine/guides/image_math (mathematical operations with images)
+- https://developers.google.com/earth-engine/apidocs/ee-image-addbands (add bands to image)
+- https://developers.google.com/earth-engine/guides/charts_overview (charts)
+- https://developers.google.com/earth-engine/guides/charts_image_collection (image collection charts)
+- https://developers.google.com/earth-engine/guides/exporting_images (exporting image to drive)
 ---
 
 ### Import asset
@@ -248,20 +273,20 @@ print(chart);
 </details>
 
 
-### Export data to Google Drive
+### Export an to Google Drive as a geotiff file
 <details>
   <summary> ... </summary>
 
 </details>
 
-### Advanced: display point locations as layers with name and color
+### Advanced topic: display point locations from feature collection as layers with name and color
 <details>
   <summary> Explore Feature Collection, lists, and getInfo() </summary>
 
 Let's create a layer per location from the Feature Collection `solar_farms`, and use the properties `name` and `color` for each layer, to make it easier to associate each chart to the corressponding location.
 
 ```
-// Map over the feature collection to extract geometry, name and color properties
+// Map over the feature collection to extract geometry, name and color properties as lists
 var featureList = solar_farms.toList(solar_farms.size());
 var geometries = featureList.map(function(feature) {
   return ee.Feature(feature).geometry();
@@ -286,10 +311,3 @@ for (var i = 0; i < geometries.length().getInfo(); i++) {
 ```
 </details>
 
-
-
-# etc
-<details>
-  <summary> ... </summary>
-
-</details>
