@@ -198,8 +198,67 @@ var solar_farms = ee.FeatureCollection([
         ee.Feature(ee.Geometry.Point([-7.537620761881514, 37.45729422065703]),{name: 'corte', color: 'purple'}),
         ]);
 ```
+</details>
 
-**Advanced**: let's create a layer per location, and use the properties `name` and `color` for each layer. 
+### Create a temporal chart for NDVI at each location
+<details>
+  <summary> ui.Chart.image.seriesByRegion, function, map </summary>
+
+```
+var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+                .select(['B4','B8'])
+                .filterBounds(alcoutim)
+                .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 1));
+
+// This function adds an NDVI band
+var add_ndvi_to_s2 = function(image) {
+  var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+  return image.addBands([ndvi]);
+};
+
+
+var S2 = S2.map(add_ndvi_to_s2)
+
+var chart =
+    ui.Chart.image
+        .seriesByRegion({
+          imageCollection: S2,
+          band: 'NDVI',
+          regions: solar_farms,
+          reducer: ee.Reducer.mean(),
+          scale: 10,
+          seriesProperty: 'name',
+          xProperty: 'system:time_start'
+        })
+        .setOptions({
+          title: 'NDVI Value by Date',
+          hAxis: {title: 'Date', titleTextStyle: {italic: false, bold: true}},
+          vAxis: {
+            title: 'NDVI',
+            titleTextStyle: {italic: false, bold: true}
+          },
+          lineWidth: 2,
+          colors: ['blue', 'yellow', 'green','red','brown','purple'],
+        });
+        
+print(chart);
+```
+
+
+</details>
+
+
+### Export data to Google Drive
+<details>
+  <summary> ... </summary>
+
+</details>
+
+### Advanced: display point locations as layers with name and color
+<details>
+  <summary> Explore Feature Collection, lists, and getInfo() </summary>
+
+Let's create a layer per location from the Feature Collection `solar_farms`, and use the properties `name` and `color` for each layer, to make it easier to associate each chart to the corressponding location.
 
 ```
 // Map over the feature collection to extract geometry, name and color properties
@@ -227,34 +286,10 @@ for (var i = 0; i < geometries.length().getInfo(); i++) {
 ```
 </details>
 
-### Create a temporal chart for the NDVI at each location
+
+
+# etc
 <details>
   <summary> ... </summary>
 
 </details>
-
-# Create temporal composite
-<details>
-  <summary> ... </summary>
-
-</details>
-
-# Create temporal composite
-<details>
-  <summary> ... </summary>
-
-</details>
-
-# Create temporal composite
-<details>
-  <summary> ... </summary>
-
-</details>
-
-# Create temporal composite
-<details>
-  <summary> ... </summary>
-
-</details>
-
-
