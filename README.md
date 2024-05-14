@@ -14,12 +14,20 @@ Data set to upload to GEE: Município de Alcoutim from CAOP 2023 in shapefile fo
 
 The tutorial will be *hands-on* using the GEE code editor. The [guideline](tutorial.pdf) for the tutorial is a selection of pages from [https://developers.google.com/earth-engine](https://developers.google.com/earth-engine) where one can find code descriptions and examples that illustrate topics like finding and filtering data (spatially, temporally and spectrally), visualizing images, creating charts, creating new images and bands, and exporting data.
 
+<details>
+  <summary>Geospatial processing services</summary>
+  
 The GEE is one of several available **geospatial processing services** ofering a public data catalog, compute infrastructure and geospatial APIs:
 1. Google Earth Engine (Google Cloud)
 2. Microsoft Planetary Computer (Azure)
 3. Amazon Web Services (AWS) GeoSpatial Services
 4. Copernicus Data Space Ecosystem, mostly for Sentinel imagery
 5. ...
+</details>
+
+
+<details>
+  <summary>Google Code Editor and documentation</summary>
 
 In this tutorial we will focus on the **GEE code editor**, which just requires a browser and do not require installing any other software in the local machine. Scripts are written in *javascript* in the code editor and personnal data can either be stored in the user's Earth Engine account (up to 250 Mb) or in Google drive.
 
@@ -40,7 +48,21 @@ The sections of the Google Earth Engine documentation that are the most relevant
 - https://developers.google.com/earth-engine/guides/charts_overview (charts)
 - https://developers.google.com/earth-engine/guides/charts_image_collection (image collection charts)
 - https://developers.google.com/earth-engine/guides/exporting_images (exporting image to drive)
+
+</details>
+
+<details>
+  <summary>Fully functional scripts that use an approximate boundary for Alcoutim</summary>
+
+- Use Sentinel 2 data to create mask for low NIR values as an approximation of water bodies: [map_water_bodies_alcoutim.js](map_water_bodies_alcoutim.js)
+- Use Sentinel-2 data to predict the location of solar panels: [map_solar_panels_alcoutim.js](map_solar_panels_alcoutim.js)
+- Use Sentinel 2 time series of NDVI and locations of solar farms to create a temporal chart and estimate when solar farms were build: [create_chart_ndvi_alcoutim.js](create_chart_ndvi_alcoutim.js)
+- Export Sentinel-2 image to Google drive: [export_S2_alcoutim_to_drive.js](export_S2_alcoutim_to_drive.js)
+
+</details>
+
 ---
+## Tutorial topics
 
 ### Import asset
 <details>
@@ -211,7 +233,9 @@ Map.addLayer(S2alcoutim.updateMask(maskSP), vizParams , 'Solar Panels');
 
 ### Create Feature Collection with one point feature per solar farm
 <details>
-  <summary> Usar `Geometry Imports` </summary>
+  <summary> Use the interactive `Geometry Imports` </summary>
+
+The goal is to create a feature collection of points. Each point represents the location of a solar farm. Points have a geometry and may have properties.
 
 ```
 var solar_farms = ee.FeatureCollection([
@@ -227,7 +251,7 @@ var solar_farms = ee.FeatureCollection([
 
 ### Create a temporal chart for NDVI at each location
 <details>
-  <summary> ui.Chart.image.seriesByRegion, function, map </summary>
+  <summary> Use ui.Chart.image.seriesByRegion, function, map </summary>
 
 ```
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
@@ -241,9 +265,10 @@ var add_ndvi_to_s2 = function(image) {
   return image.addBands([ndvi]);
 };
 
-
+// apply function to all images in the collection
 var S2 = S2.map(add_ndvi_to_s2)
 
+// create chart
 var chart =
     ui.Chart.image
         .seriesByRegion({
@@ -265,17 +290,33 @@ var chart =
           lineWidth: 2,
           colors: ['blue', 'yellow', 'green','red','brown','purple'],
         });
-        
+
+// print chart
 print(chart);
 ```
-
 
 </details>
 
 
 ### Export an to Google Drive as a geotiff file
 <details>
-  <summary> ... </summary>
+  <summary> Export.image.toDrive </summary>
+
+```
+// export to drive
+// Set the export "scale" and "crs" parameters.
+Export.image.toDrive({
+  image: S2clear,
+  description: 'S2_alcoutim',
+  folder: 'curso_terra',
+  region: alcoutim,
+  scale: 10,
+  crs: 'EPSG:3763'
+});
+```
+
+Suggestion: Try exporting `solar_farms` to *shapefile* following instructions on https://developers.google.com/earth-engine/guides/exporting_tables.
+
 
 </details>
 
