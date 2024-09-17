@@ -1,6 +1,6 @@
-**Academia Terra**
+**UC Agricultura Digital**
 
-Tutorial: Introduction to the Google Earth Engine for monitoring the environment (May 14, 2024)
+Tutorial: Brief Introduction to the Google Earth Engine ( ?? set 2024)
 
 Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18-3B3C-06BB)
 
@@ -8,7 +8,6 @@ Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18
 
 Before the tutorial, please sign up for [Google Earth Engine](https://code.earthengine.google.com/).
 
-Data set to upload to GEE: Município de Alcoutim from CAOP 2023 in shapefile format [Alcoutim.zip](alcoutim.zip)
 
 ---
 
@@ -52,53 +51,38 @@ The sections of the Google Earth Engine documentation that are the most relevant
 </details>
 
 <details>
-  <summary>Fully functional scripts that use an approximate boundary for Alcoutim</summary>
+  <summary>Fully functional scripts </summary>
 
-- Use Sentinel 2 data to create mask for low NIR values as an approximation of water bodies: [map_water_bodies_alcoutim.js](map_water_bodies_alcoutim.js)
-- Use Sentinel-2 data to predict the location of solar panels: [map_solar_panels_alcoutim.js](map_solar_panels_alcoutim.js)
-- Use Sentinel 2 time series of NDVI and locations of solar farms to create a temporal chart and estimate when solar farms were build: [create_chart_ndvi_alcoutim.js](create_chart_ndvi_alcoutim.js)
-- Export Sentinel-2 image to Google drive: [export_S2_alcoutim_to_drive.js](export_S2_alcoutim_to_drive.js)
+- Use Sentinel 2 time series of NDVI and locations of solar farms to create a temporal chart and estimate when solar farms were build: [create_chart_ndvi.js](create_chart_ndvi.js)
+- Export Sentinel-2 image to Google drive: [export_S2_to_drive.js](export_S2_to_drive.js)
 
 </details>
 
 ---
 ## Tutorial topics
 
-### Import asset
-<details>
-  <summary>Import asset: shapefile for município de Alcoutim</summary>
 
-1. Go to assets on the GEE code editor;
-2. Click `New` and choose `Shape files`;
-3. Select the files for the shapefile (at least `.dbf`, `.prj`, `.shp` and `.shx`)
-4. Click `Upload`
-5. Go to `Tasks` and confirm that the table is *ingested*.
-
-The asset should then be available in  `LEGACY ASSETS`. It can be imported to the script with `Import`. You can change the *table* name, to define your own variable of type `FeatureCollection`. The line of code that will be something like
-```
-var alcoutim = ee.FeatureCollection("users/mlc-edu-ulisboa-pt/alcoutim")
-```
-  
-</details>
 
 ### Access image collection (Sentinel-2)
 <details>
   <summary>Access, filter and plot Sentinel-2 image collection</summary>
 
-The following script uses the `alcoutim` variable, so that needs to be defined first. 
-
-Then it accesses Sentinel-2, level 2A images and it folters by dates and by bounds. Alll Sentinel-2 tiles that *intersect* the region are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection` (this operation should come at the end).
+The following script accesses Sentinel-2, level 2A images and it filters by dates and by bounds: here, the region of interest ROI is a single point defined by its coordinates. All Sentinel-2 tiles that *intersect* the geometry are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection` (this operation should come at the end).
 
 ```
+// create point geometry from longitude and latitude
+var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
+
 // access image collection, filter for location and range of dates
 // sort by percentage of clouds (most cloudier first)
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
-                .filterBounds(alcoutim)
-                .filterDate('2023-06-01', '2023-08-31')
-                .sort('CLOUDY_PIXEL_PERCENTAGE',false);
+                .filterBounds(geometry)
+                .filterDate('2024-06-01', '2024-09-18')
+                .sort('CLOUDY_PIXEL_PERCENTAGE',true)
+                .first();
 
 // center map; 11 is the zoom level; 12 would zoom in further
-Map.centerObject(S2, 11);
+Map.centerObject(geometry, 16);
 
 // add layers
 Map.addLayer(S2, {bands: ['B4', 'B3', 'B2'], min: 0, max: 2500}, 'Sentinel-2 level 2A RGB=432');
@@ -106,8 +90,8 @@ Map.addLayer(S2, {bands: ['B4', 'B3', 'B2'], min: 0, max: 2500}, 'Sentinel-2 lev
 // print to console
 print(S2);
 
-// Add Alcotim to the map
-Map.addLayer(alcoutim, {color: 'gray'}, 'Alcoutim');
+// Add geometry to the map
+Map.addLayer(geometry, {color: 'red'}, 'Vinha ISA');
 ```
 
 If you want to plot a false color composite, you can use instead
