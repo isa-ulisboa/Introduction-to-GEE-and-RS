@@ -53,8 +53,8 @@ The sections of the Google Earth Engine documentation that are the most relevant
 <details>
   <summary>Fully functional scripts </summary>
 
-- Use Sentinel 2 time series of NDVI and locations of solar farms to create a temporal chart and estimate when solar farms were build: [create_chart_ndvi.js](create_chart_ndvi.js)
-- Export Sentinel-2 image to Google drive: [export_S2_to_drive.js](export_S2_to_drive.js)
+- Basic access to Sentinel-2 data: [basic_S2_composite.js](basic_S2_composite.js)
+- Create a basic NDVI time series chart: [export_S2_to_drive.js](export_S2_to_drive.js)
 
 </details>
 
