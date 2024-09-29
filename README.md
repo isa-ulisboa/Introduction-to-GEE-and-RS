@@ -1,6 +1,6 @@
 **UC Agricultura Digital**
 
-Tutorial: Brief Introduction to the Google Earth Engine ( ?? set 2024)
+Tutorial: Brief Introduction to the Google Earth Engine (October 2-9, 2024)
 
 Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18-3B3C-06BB)
 
@@ -20,7 +20,7 @@ The GEE is one of several available **geospatial processing services** ofering a
 1. Google Earth Engine (Google Cloud)
 2. Microsoft Planetary Computer (Azure)
 3. Amazon Web Services (AWS) GeoSpatial Services
-4. Copernicus Data Space Ecosystem, mostly for Sentinel imagery
+4. [Copernicus Data Space Ecosystem](https://jupyterhub.dataspace.copernicus.eu), mostly for Sentinel imagery
 5. ...
 </details>
 
@@ -54,7 +54,11 @@ The sections of the Google Earth Engine documentation that are the most relevant
   <summary>Fully functional scripts </summary>
 
 - Basic access to Sentinel-2 data: [basic_S2_composite.js](basic_S2_composite.js)
-- Create a basic NDVI time series chart: [export_S2_to_drive.js](export_S2_to_drive.js)
+- Create basic Sentinel-2 (median) temporal composite: [basic_temporal_composite.js](basic_temporal_composite.js)
+- Access Sentinel-2 data and create a basic NDVI chart: [basic_S2_composite.js](basic_S2_composite.js) 
+- Access Sentinel-2 data and create a basic NDVI chart with built-in cloud screening: [QA_screening_NDVI_chart.js](QA_screening_NDVI_chart.js)
+- Access Sentinel-2 data and create a basic NDVI chart with cs-Plus cloud screening: [csPlus_screening_NDVI_chart.js](csPlus_screening_NDVI_chart.js)
+- Access Sentinel-2 data and create a multi-point NDVI chart with cs-Plus cloud screening: [points_cs_charts.js](points_cs_charts.js)
 
 </details>
 
@@ -67,25 +71,24 @@ The sections of the Google Earth Engine documentation that are the most relevant
 <details>
   <summary>Access, filter and plot Sentinel-2 image collection</summary>
 
-The following script accesses Sentinel-2, level 2A images and it filters by dates and by bounds: here, the region of interest ROI is a single point defined by its coordinates. All Sentinel-2 tiles that *intersect* the geometry are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection` (this operation should come at the end).
+The following script accesses Sentinel-2, level 2A images and it filters by dates and by bounds: here, the region of interest `geometry` is a single point defined by its coordinates. All Sentinel-2 tiles that *intersect* the geometry are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection`. Note that sorting the collection by the property `CLOUDY_PIXEL_PERCENTAGE` should be applied last since it is computationally more demanding.
 
 ```
-// create point geometry from longitude and latitude
 var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
 
 // access image collection, filter for location and range of dates
 // sort by percentage of clouds (most cloudier first)
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                 .filterBounds(geometry)
-                .filterDate('2024-06-01', '2024-09-18')
-                .sort('CLOUDY_PIXEL_PERCENTAGE',true)
-                .first();
+                .filterDate('2024-06-01', '2024-09-30')
+                .select(['B8', 'B4', 'B3','B2'])
+                .sort('CLOUDY_PIXEL_PERCENTAGE',true);
 
 // center map; 11 is the zoom level; 12 would zoom in further
 Map.centerObject(geometry, 16);
 
-// add layers
-Map.addLayer(S2, {bands: ['B4', 'B3', 'B2'], min: 0, max: 2500}, 'Sentinel-2 level 2A RGB=432');
+// add true color composite layer to the map
+Map.addLayer(S2.first(), {bands: ['B4', 'B3', 'B2'], min: 0, max: 2500}, 'Sentinel-2 level 2A RGB=432');
 
 // print to console
 print(S2);
@@ -96,26 +99,26 @@ Map.addLayer(geometry, {color: 'red'}, 'Vinha ISA');
 
 If you want to plot a false color composite, you can use instead
 ```
-Map.addLayer(S2, {bands: ['B8', 'B4', 'B3'], min: 0, max: 3000}, 'Sentinel-2 level 2A RGB=843');
+Map.addLayer(S2.first(), {bands: ['B8', 'B4', 'B3'], min: [0,0,0], max: [4500, 3500, 3500]}, 'Sentinel-2 level 2A RGB=843');
 ```
 
 </details>
 
 
-### Create single image and select bands
+### Create single temporal composite 
 <details>
   <summary> Select images with low cloud cover and combine them into a single image </summary>
 
 The idea is to filter the Sentinel-2 image collection using the property `CLOUDY_PIXEL_PERCENTAGE`. Only images with less than 1% cloud cover are selected. Then selected images are combined with a *temporal reducer* which can be for instance the `mean` or the `median`.
 
 ```
-// First, import 'alcoutim'
+var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
 
 // access image collection, select 10 m bands, filter for location and range of dates
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                 .select(['B2','B3','B4','B8'])
-                .filterBounds(alcoutim)
-                .filterDate('2023-06-01', '2023-08-31')
+                .filterBounds(geometry)
+                .filterDate('2024-01-01', '2024-03-01')
 
 // filter using property
 var filtered = S2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 1));
@@ -123,17 +126,14 @@ var filtered = S2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 1));
 // reduce image collection to image
 var S2clear=filtered.median()
 
-// clip image using feature collection, just for visualization
-var S2alcoutim=S2clear.clip(alcoutim)
-
 // center map
-Map.centerObject(S2, 11);
+Map.centerObject(geometry, 13);
 
 // simple set of parameters for visualization
 var vizParams={bands: ['B8', 'B4', 'B3'], min: 0, max: 3000}
 
 // add layer
-Map.addLayer(S2alcoutim, vizParams, 'Sentinel-2 level 2A');
+Map.addLayer(S2clear, vizParams, 'Sentinel-2 level 2A, RGB=843, Jan 1-Mar 1, 2024');
 
 ```
 
