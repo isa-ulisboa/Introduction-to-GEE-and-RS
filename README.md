@@ -16,6 +16,7 @@ Before the tutorial, please sign up for [Google Earth Engine](https://code.earth
 The tutorial will be *hands-on* using the GEE code editor. The [guideline](tutorial.pdf) for the tutorial is a selection of pages from [https://developers.google.com/earth-engine](https://developers.google.com/earth-engine) where one can find code descriptions and examples that illustrate topics like finding and filtering data (spatially, temporally and spectrally), visualizing images, creating charts, creating new images and bands, screening images for clouds, and exporting data.
 
 <details>
+  
   <summary>Geospatial processing services</summary>
   
 The GEE is one of several available **geospatial processing services** ofering a public data catalog, compute infrastructure and geospatial APIs:
@@ -298,6 +299,7 @@ var chart =
         
 print(chart);
 ```
+
 </details>
 
 ### Cloud screening at the pixel level; Cloud Score+ image collection for Sentinel-2
@@ -363,6 +365,7 @@ var chart =
         
 print(chart);
 ```
+
 </details>
 
 ### Create NDVI charts for a set of locations
@@ -370,7 +373,8 @@ print(chart);
   
   <summary> Multi-point NDVI charts with Cloud Score+ screening </summary>
 
-The 
+The Google Code Editor 
+
 ```
 var multipoints =[[-9.18511947486878, 38.70673673565854],
          [-9.185698832015996, 38.707121861392295],
