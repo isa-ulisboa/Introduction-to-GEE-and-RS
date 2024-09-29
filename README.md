@@ -28,6 +28,7 @@ The GEE is one of several available **geospatial processing services** ofering a
 
 
 <details>
+  
   <summary>Google Code Editor and documentation</summary>
 
 In this tutorial we will focus on the **GEE code editor**, which just requires a browser and do not require installing any other software in the local machine. Scripts are written in *javascript* in the code editor and personnal data can either be stored in the user's Earth Engine account (up to 250 Mb) or in Google drive.
@@ -53,6 +54,7 @@ The sections of the Google Earth Engine documentation that are the most relevant
 </details>
 
 <details>
+  
   <summary>Fully functional scripts </summary>
 
 - Basic access to Sentinel-2 data: [basic_S2_composite.js](basic_S2_composite.js)
@@ -71,6 +73,7 @@ The sections of the Google Earth Engine documentation that are the most relevant
 
 ### Access image collection (Sentinel-2)
 <details>
+  
   <summary>Access, filter and plot Sentinel-2 image collection</summary>
 
 The following script accesses Sentinel-2, level 2A images and it filters by dates and by bounds: here, the region of interest `geometry` is a single point defined by its coordinates. All Sentinel-2 tiles that *intersect* the geometry are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection`. Note that sorting the collection by the property `CLOUDY_PIXEL_PERCENTAGE` should be applied last since it is computationally more demanding.
@@ -109,6 +112,7 @@ Map.addLayer(S2.first(), {bands: ['B8', 'B4', 'B3'], min: [0,0,0], max: [4500, 3
 
 ### Create simple (median) temporal composite; temporal reducer
 <details>
+  
   <summary> Select images with low cloud cover and combine them into a single image </summary>
 
 The idea is to filter the Sentinel-2 image collection using the property `CLOUDY_PIXEL_PERCENTAGE`. Only images with less than 1% cloud cover are selected. Then selected images are combined with a *temporal reducer* which can be for instance the `mean` or the `median`.
@@ -150,6 +154,7 @@ Suggestions:
 
 ### Create a new band (e.g. NDVI) and add it to the image
 <details>
+  
   <summary> Create an index with normalized difference; add index to image bands</summary>
 
 In remote sensing, it is very common to use an operation called *normalized difference* between two bands to compute an index. The most well-known index is the NDVI which measures the *greenness* of the land cover. 
@@ -170,6 +175,7 @@ image = image.addBands([ndvi])
 ### Create a basic temporal chart for NDVI 
 
 <details>
+  
   <summary> Function, map and temporal chart </summary>
 
 The idea is to add the NDVI band to each image of a Sentinel-2 collection, and plot the NDVI values at a certain location along time with `ui.Chart.image.seriesByRegion`: see https://developers.google.com/earth-engine/guides/charts_overview and https://developers.google.com/earth-engine/guides/charts_image_collection for an overview of charts in GEE.
@@ -222,6 +228,7 @@ print(chart);
 ### Cloud screening at the pixel level; Sentinel-2 built-in screening with QA band
 
 <details>
+  
   <summary> Cloud screening with Sentinel-2 QA band </summary>
 
 ```
@@ -296,6 +303,7 @@ print(chart);
 ### Cloud screening at the pixel level; Cloud Score+ image collection for Sentinel-2
 
 <details>
+  
   <summary> Cloud screening with Cloud Score+ </summary>
 
 Cloud Score+ is a Google product that is derived from Sentinel-2 [https://ieeexplore.ieee.org/document/10208818] and that can be combined with Sentinel-2 imagery to mask pixels with cloud score above some given threshold. The code below uses the `linkCollection` method to combine the Sentinel-2 collection with the Cloud Score+ collection. By default, the match is based on the `system:index` image property.
@@ -359,6 +367,7 @@ print(chart);
 
 ### Create NDVI charts for a set of locations
 <details>
+  
   <summary> Multi-point NDVI charts with Cloud Score+ screening </summary>
 
 The 
@@ -444,6 +453,7 @@ print(chart);
 
 ### Export an image to Google Drive as a geotiff file
 <details>
+  
   <summary> Export.image.toDrive </summary>
 
 ```
