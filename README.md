@@ -105,7 +105,7 @@ Map.addLayer(S2.first(), {bands: ['B8', 'B4', 'B3'], min: [0,0,0], max: [4500, 3
 </details>
 
 
-### Create single temporal composite 
+### Create simple (median) temporal composite; temporal reducer
 <details>
   <summary> Select images with low cloud cover and combine them into a single image </summary>
 
@@ -121,12 +121,12 @@ var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                 .filterDate('2024-01-01', '2024-03-01')
 
 // filter using property
-var filtered = S2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 1));
+var filtered = S2.filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 10));
 
 // reduce image collection to image
 var S2clear=filtered.median()
 
-// center map
+// center map; 13 is the zoom level; 14 would zoom in more
 Map.centerObject(geometry, 13);
 
 // simple set of parameters for visualization
@@ -146,125 +146,285 @@ Suggestions:
 
 </details>
 
-### Image vizualization and masking
+### Create a new band (e.g. NDVI) and add it to the image
 <details>
-  <summary> Additional parameters for image visualization; updateMask; palette </summary>
+  <summary> Create an index with normalized difference; add index to image bands</summary>
 
-As described in  [https://developers.google.com/earth-engine/guides/image_visualization](https://developers.google.com/earth-engine/guides/image_visualization) there are many parameters for visualizaton. Some of them accept a single value to be applied to all bands, or a list of three values to be applied to the RGB bands. Typically, one creates a *dictionary* of parameters and then used it with `Map.addLayer()` or with `image.visualize()`.
-
-```
-// Define the visualization parameters.
-var vizParams = {
-  bands: ['B8', 'B4', 'B3'],
-  min: 0,
-  max: [5000,4000,4000],
-  opacity: 0.7
-};
-
-// add layer
-Map.addLayer(S2alcoutim, vizParams, 'S2 Alcoutim');
-```
-
-If one wants to **visualize only the pixels that satisfy some particular condition**, one can use method `updateMask` as in the following example, where we look at pixels that have a very low reflectance in the near infrared (nir) which corresponds to band 8 in Sentinel-2. The idea is to create a new image `nir` with only that band using method `select('B8')` and then visualize only pixels in `nir` that satisfy the condition ${\rm nir} < 800$, i.e. reflectance below 8%.
-
-```
-// Extra lines of script to create a map of low NIR values (water bodies)
-// create new image with just one band
-var nir = S2alcoutim.select('B8');
-
-// Update mask so only pixels with value below 800 are not masked
-var nirLow = nir.updateMask(nir.lt(800));
-
-// This palette indicates the colors associated to the minimum and maximum values
-var vizNir={min:0, max: 800, palette: ['00FFFF', '0000FF']}; // cyan to blue
-
-// Visualize nirMasked so pixels with NIR close to zero are shown in cyan and pixels with NIR close to 8% are showed in blue
-Map.addLayer(nirLow, vizNir, 'NIR below 8% (water bodies)');
-```
-</details>
-
-### Create a new band and add it to the image; create mask from bands
-<details>
-  <summary> Create an index with normalized difference; add index to image bands; create and apply mask for solar panels</summary>
-
-In remote sensing, it is very common to use an operation called *normalized difference* between two bands to compute an index. The most well-known index is the NDVI which measures the *greenness* of the land cover. Here, we also create an index that will help discriminate solar panels from other land cover types. Towards that end, we consider bands `B2` and `B3` from which we compute the new band `ndgb`. 
+In remote sensing, it is very common to use an operation called *normalized difference* between two bands to compute an index. The most well-known index is the NDVI which measures the *greenness* of the land cover. 
 
 We could created those indices with an expression or we can simply use the *normalized difference* operation available in GEE (see [https://developers.google.com/earth-engine/apidocs/ee-image-normalizeddifference](https://developers.google.com/earth-engine/apidocs/ee-image-normalizeddifference)).
 
 ```
-// create new images for NDGB and NDVI: notice that values are between -1 and 1.
-var ndgb = S2alcoutim.normalizedDifference(['B3', 'B2']).rename('NDGB');
-var ndvi = S2alcoutim.normalizedDifference(['B8', 'B4']).rename('NDVI');
+// image needs to be defined, and has to have bands names B8 and B4
+
+// create new band NDVI: notice that values are between -1 and 1.
+var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
 
 // add band to image
-S2alcoutim = S2alcoutim.addBands([ndgb,ndvi])
-
-// create mask from bands
-var maskSP=S2alcoutim.select('B8').gt(1000)
-          .and(S2alcoutim.select('B3').lt(1250))
-          .and(S2alcoutim.select('B8').lt(1800))
-          .and(S2alcoutim.select('NDGB').lt(0.13))
-          .and(S2alcoutim.select('NDVI').lt(0.15))
-
-// define visualization parameters so the color depends on the value of B3, ranging from red (B3=0) to brown (B3=1250)
-var vizParams={bands: ['B3'], min:500, max: 1250, palette: ['FF0000', '964B00']} // red and brown
-// Instead of adding the whole S2alcoutim image, this masks the pixels in maskSP first
-Map.addLayer(S2alcoutim.updateMask(maskSP), vizParams , 'Solar Panels');
-
-```
-
-</details>
-
-### Create Feature Collection with one point feature per solar farm
-<details>
-  <summary> Use the interactive `Geometry Imports` </summary>
-
-The goal is to create a feature collection of points. Each point represents the location of a solar farm. Points have a geometry and may have properties.
-
-```
-var solar_farms = ee.FeatureCollection([
-        ee.Feature(ee.Geometry.Point([-7.581315725226887, 37.44977560189899]),{name: 'vicentes', color: 'blue'}),
-        ee.Feature(ee.Geometry.Point([-7.613073079963215, 37.449980021136575]),{name: 'pereiro', color: 'yellow'}),
-        ee.Feature(ee.Geometry.Point([-7.693075049521815, 37.383792590263845]),{name: 'zambujal', color: 'green'}),
-        ee.Feature(ee.Geometry.Point([-7.673361113945973, 37.45563071528393]),{name: 'viçoso', color: 'red'}),
-        ee.Feature(ee.Geometry.Point([-7.715182889197569, 37.41416981246133]),{name: 'santa_justa', color: 'brown'}),
-        ee.Feature(ee.Geometry.Point([-7.537620761881514, 37.45729422065703]),{name: 'corte', color: 'purple'}),
-        ]);
+image = image.addBands([ndvi])
 ```
 </details>
 
-### Create a temporal chart for NDVI at each location
+### Create a basic temporal chart for NDVI 
+
 <details>
-  <summary> Use ui.Chart.image.seriesByRegion, function, map </summary>
+  <summary> Function, map and temporal chart </summary>
+
+The idea is to add the NDVI band to each image of a Sentinel-2 collection, and plot the NDVI values at a certain location along time with `ui.Chart.image.seriesByRegion`: see https://developers.google.com/earth-engine/guides/charts_overview and https://developers.google.com/earth-engine/guides/charts_image_collection for an overview of charts in GEE.
 
 ```
+var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
+
+// access image collection, filter for location and range of dates
+// sort by percentage of clouds (most cloudier first)
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
-                .select(['B4','B8'])
-                .filterBounds(alcoutim)
-                .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 1));
+      .filterBounds(geometry)
+      .filterDate('2022-06-01', '2024-09-30')
+      .select(['B8', 'B4'])
 
-// This function adds an NDVI band
+// center map; 16 is the zoom level; 17 would zoom in further
+Map.centerObject(geometry, 16);
+
+// print to console
+print(S2);
+
+// Add geometry to the map
+Map.addLayer(geometry, {color: 'red'}, 'Vinha ISA');
+
+// Function that adds an NDVI band to an image with B4 and B8
 var add_ndvi_to_s2 = function(image) {
   var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
   return image.addBands([ndvi]);
 };
 
-// apply function to all images in the collection
+// Add NDVI to all the images of the collection
 var S2 = S2.map(add_ndvi_to_s2)
 
-// create chart
+// Create chart
 var chart =
     ui.Chart.image
         .seriesByRegion({
           imageCollection: S2,
           band: 'NDVI',
-          regions: solar_farms,
+          regions: geometry,
           reducer: ee.Reducer.mean(),
           scale: 10,
-          seriesProperty: 'name',
+          xProperty: 'system:time_start'
+        });
+        
+print(chart);
+```
+
+</details>
+
+### Cloud screening at the pixel level; Sentinel-2 built-in screening with QA band
+
+<details>
+  <summary> Cloud screening with Sentinel-2 QA band </summary>
+
+```
+var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
+
+/**
+ * Function to mask clouds using the Sentinel-2 QA band
+ * @param {ee.Image} image Sentinel-2 image
+ * @return {ee.Image} cloud masked Sentinel-2 image
+ * https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED
+ */
+function maskS2clouds(image) {
+  var date = image.get('system:time_start'); // otherwise, this property is lost
+  var qa = image.select('QA60');
+
+  // Bits 10 and 11 are clouds and cirrus, respectively.
+  var cloudBitMask = 1 << 10;
+  var cirrusBitMask = 1 << 11;
+
+  // Both flags should be set to zero, indicating clear conditions.
+  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
+      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
+
+  return image.updateMask(mask).divide(10000).set('system:time_start', date);
+}
+
+
+// access image collection, filter for location and range of dates
+// use built-in cloud screening (tile and pixel level)
+var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+      .filterBounds(geometry)
+      .filterDate('2022-06-01', '2024-09-30')
+      .select(['B8', 'B4','QA60'])
+      // Pre-filter to get less cloudy granules.
+      .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',20))
+      .map(maskS2clouds);
+
+// center map; 
+Map.centerObject(geometry, 16);
+
+// print to console
+print(S2);
+
+// Add geometry to the map
+Map.addLayer(geometry, {color: 'red'}, 'Vinha ISA');
+
+// Function that adds an NDVI band to an image with B4 and B8
+var add_ndvi_to_s2 = function(image) {
+  var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+  return image.addBands([ndvi]);
+};
+
+// Add NDVI to all the images of the collection
+var S2 = S2.map(add_ndvi_to_s2)
+
+// Create chart
+var chart =
+    ui.Chart.image
+        .seriesByRegion({
+          imageCollection: S2,
+          band: 'NDVI',
+          regions: geometry,
+          reducer: ee.Reducer.mean(),
+          scale: 10,
+          xProperty: 'system:time_start'
+        });
+        
+print(chart);
+```
+</details>
+
+### Cloud screening at the pixel level; Cloud Score+ image collection for Sentinel-2
+
+<details>
+  <summary> Cloud screening with Cloud Score+ </summary>
+
+Cloud Score+ is a Google product that is derived from Sentinel-2 [https://ieeexplore.ieee.org/document/10208818] and that can be combined with Sentinel-2 imagery to mask pixels with cloud score above some given threshold. The code below uses the `linkCollection` method to combine the Sentinel-2 collection with the Cloud Score+ collection. By default, the match is based on the `system:index` image property.
+
+```
+var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
+
+// Cloud Score+ image collection. Note Cloud Score+ is produced from Sentinel-2
+// Level 1C data and can be applied to either L1C or L2A collections.
+var csPlus = ee.ImageCollection('GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED');
+
+// Use 'cs' or 'cs_cdf', depending on your use case; see docs for guidance.
+var QA_BAND = 'cs';
+// The threshold for masking; values between 0.50 and 0.65 generally work well.
+// Higher values will remove thin clouds, haze & cirrus shadows.
+var CLEAR_THRESHOLD = 0.60;
+
+// access image collection, filter for location and range of dates
+// sort by percentage of clouds (most cloudier first)
+var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+      .filterBounds(geometry)
+      .filterDate('2022-06-01', '2024-09-30')
+      .select(['B8', 'B4'])
+      .linkCollection(csPlus, [QA_BAND])
+      .map(function(img) {
+        return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    })
+
+// print to console
+print(S2);
+
+// center map; 11 is the zoom level; 12 would zoom in further
+Map.centerObject(geometry, 16);
+
+// Add geometry to the map
+Map.addLayer(geometry, {color: 'red'}, 'Vinha ISA');
+
+// Function adds an NDVI band to an image
+var add_ndvi_to_s2 = function(image) {
+  var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+  return image.addBands([ndvi]);
+};
+
+// add NDVI band to each image
+var S2 = S2.map(add_ndvi_to_s2)
+
+var chart =
+    ui.Chart.image
+        .seriesByRegion({
+          imageCollection: S2,
+          band: 'NDVI',
+          regions: geometry,
+          reducer: ee.Reducer.mean(),
+          scale: 10,
+          xProperty: 'system:time_start'
+        })
+        
+print(chart);
+```
+</details>
+
+### Create NDVI charts for a set of locations
+<details>
+  <summary> Multi-point NDVI charts with Cloud Score+ screening </summary>
+
+The 
+```
+var multipoints =[[-9.18511947486878, 38.70673673565854],
+         [-9.185698832015996, 38.707121861392295],
+         [-9.184983887235997, 38.70708122565936]];
+
+var geometry = ee.FeatureCollection(multipoints.map(function(p){
+  var point = ee.Feature(ee.Geometry.Point(p), {})
+  return point
+}))
+
+print(geometry)
+
+// Cloud Score+ image collection. Note Cloud Score+ is produced from Sentinel-2
+// Level 1C data and can be applied to either L1C or L2A collections.
+var csPlus = ee.ImageCollection('GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED');
+
+// Use 'cs' or 'cs_cdf', depending on your use case; see docs for guidance.
+var QA_BAND = 'cs';
+// The threshold for masking; values between 0.50 and 0.65 generally work well.
+// Higher values will remove thin clouds, haze & cirrus shadows.
+var CLEAR_THRESHOLD = 0.60;
+
+// access image collection, filter for location and range of dates
+// sort by percentage of clouds (most cloudier first)
+var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+      .filterBounds(geometry)
+      .filterDate('2022-06-01', '2024-09-30')
+      .select(['B8', 'B4'])
+      .linkCollection(csPlus, [QA_BAND])
+      .map(function(img) {
+        return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+    })
+
+
+// center map; 16 is the zoom level; 17 would zoom in further
+Map.centerObject(geometry, 16);
+
+// print to console
+print(S2);
+
+// Add geometry to the map
+Map.addLayer(geometry, {color: 'red'}, 'Vinha ISA');
+
+// Add NDVI to one image
+var add_ndvi_to_s2 = function(image) {
+  var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+  return image.addBands([ndvi]);
+};
+
+// Add NDVI to all images
+var S2 = S2.map(add_ndvi_to_s2)
+
+// Create chart with options
+var chart =
+    ui.Chart.image
+        .seriesByRegion({
+          imageCollection: S2,
+          band: 'NDVI',
+          regions: geometry,
+          reducer: ee.Reducer.mean(),
+          scale: 10,
           xProperty: 'system:time_start'
         })
         .setOptions({
+          interpolateNulls: true,
           title: 'NDVI Value by Date',
           hAxis: {title: 'Date', titleTextStyle: {italic: false, bold: true}},
           vAxis: {
@@ -272,17 +432,15 @@ var chart =
             titleTextStyle: {italic: false, bold: true}
           },
           lineWidth: 2,
-          colors: ['blue', 'yellow', 'green','red','brown','purple'],
+          colors: ['blue','red','green'], //['blue', 'yellow', 'green','red','brown','purple'],
         });
-
-// print chart
+        
 print(chart);
-```
 
+```
 </details>
 
-
-### Export an to Google Drive as a geotiff file
+### Export an image to Google Drive as a geotiff file
 <details>
   <summary> Export.image.toDrive </summary>
 
@@ -302,37 +460,5 @@ Export.image.toDrive({
 Suggestion: Try exporting `solar_farms` to *shapefile* following instructions on https://developers.google.com/earth-engine/guides/exporting_tables.
 
 
-</details>
-
-### Advanced topic: display point locations from feature collection as layers with name and color
-<details>
-  <summary> Explore Feature Collection, lists, and getInfo() </summary>
-
-Let's create a layer per location from the Feature Collection `solar_farms`, and use the properties `name` and `color` for each layer, to make it easier to associate each chart to the corressponding location.
-
-```
-// Map over the feature collection to extract geometry, name and color properties as lists
-var featureList = solar_farms.toList(solar_farms.size());
-var geometries = featureList.map(function(feature) {
-  return ee.Feature(feature).geometry();
-});
-var names = featureList.map(function(feature) {
-  return ee.Feature(feature).get('name');
-});
-var colors = featureList.map(function(feature) {
-  return ee.Feature(feature).get('color');
-});
-// Iterate over geometries and names
-for (var i = 0; i < geometries.length().getInfo(); i++) {
-  // Get the geometry and name for the current iteration
-  var geometry = ee.Geometry(geometries.get(i));
-  var nome = names.get(i).getInfo();
-  var color = colors.get(i).getInfo();
-  // Create a point feature using the geometry
-  var point = ee.Feature(geometry, {'name' : nome});
-  // Add the point layer to the map with the name as the layer label
-  Map.addLayer(point, {color: color}, nome);
-}
-```
 </details>
 
