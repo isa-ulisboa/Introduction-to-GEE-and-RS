@@ -1,3 +1,6 @@
+<script src="https://rawcdn.githack.com/oscarmorrison/md-page/master/md-page.js"></script><noscript>
+
+
 **UC Agricultura Digital**
 
 Tutorial: Brief Introduction to the Google Earth Engine (October 2-9, 2024)
