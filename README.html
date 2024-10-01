@@ -229,7 +229,7 @@ print(chart);
 
 </details>
 
-### Cloud screening at the pixel level; Sentinel-2 built-in screening with QA band
+### NDVI chart with cloud screening at the pixel level with Sentinel-2 QA band
 
 <details>
   
@@ -305,7 +305,7 @@ print(chart);
 
 </details>
 
-### Cloud screening at the pixel level; Cloud Score+ image collection for Sentinel-2
+### NDVI chart with cloud screening at the pixel level with Cloud Score+ for Sentinel-2
 
 <details>
   
@@ -464,19 +464,10 @@ print(chart);
   <summary> Export.image.toDrive </summary>
 
 ```
-// export to drive
-// Set the export "scale" and "crs" parameters.
-Export.image.toDrive({
-  image: S2clear,
-  description: 'S2_alcoutim',
-  folder: 'curso_terra',
-  region: alcoutim,
-  scale: 10,
-  crs: 'EPSG:3763'
-});
+#To complete
 ```
 
-Suggestion: Try exporting `solar_farms` to *shapefile* following instructions on https://developers.google.com/earth-engine/guides/exporting_tables.
+Suggestion: Try exporting geometry to *shapefile* following instructions on https://developers.google.com/earth-engine/guides/exporting_tables.
 
 
 </details>
