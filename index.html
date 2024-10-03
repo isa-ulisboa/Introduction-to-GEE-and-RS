@@ -141,9 +141,7 @@ Map.addLayer(S2clear, vizParams, 'Sentinel-2 level 2A, RGB=843, Jan 1-Mar 1, 202
 ![Alt text](https://developers.google.com/static/earth-engine/images/Reduce_ImageCollection.png "Image collection reduction")
 
 
-Suggestions: 
-1. Try using other properties for filtering;
-2. Use the  `Inspector` tool to check the pixel values inside and outside the clipped image.
+In the example above, `median` is applied to all values of the image collection for the same pixel.  As a result, the date for each pixel of the reduced image can be distinct: for instance for one pixel the median value could correspond to `2022-01-05` while for a neighbor pixel the date could be , say, `2022-02-10'.
 
 </details>
 
