@@ -80,7 +80,7 @@ var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
                 .select(['B8', 'B4', 'B3','B2'])
                 .sort('CLOUDY_PIXEL_PERCENTAGE',true);
 
-// center map; 11 is the zoom level; 12 would zoom in further
+// center map; 16 is the zoom level; 17 would zoom in further
 Map.centerObject(geometry, 16);
 
 // add true color composite layer to the map
@@ -108,7 +108,7 @@ Map.addLayer(S2.first(), {bands: ['B8', 'B4', 'B3'], min: [0,0,0], max: [4500, 3
 
   * Link to script for  to create basic Sentinel-2 (median) temporal composite: [basic_temporal_composite.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/basic_temporal_composite.js)
 
-The idea is to filter the Sentinel-2 image collection using the property `CLOUDY_PIXEL_PERCENTAGE`. Only images with less than 1% cloud cover are selected. Then selected images are combined with a *temporal reducer* which can be for instance the `mean` or the `median`.
+The idea is to filter the Sentinel-2 image collection using the property `CLOUDY_PIXEL_PERCENTAGE`. Only images with less than 10% cloud cover are selected. Then selected images are combined with a *temporal reducer* which can be for instance the `mean` or the `median`.
 
 ```
 // ROI: in this case it is a single point determined by its longitude and latitude
