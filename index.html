@@ -70,6 +70,7 @@ The sections of the Google Earth Engine documentation that are the most relevant
 The script accesses Sentinel-2, level 2A images and it filters by dates and by bounds: here, the region of interest `geometry` is a single point defined by its coordinates. All Sentinel-2 tiles that *intersect* the geometry are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection`. Note that sorting the collection by the property `CLOUDY_PIXEL_PERCENTAGE` should be applied last since it is computationally more demanding.
 
 ```
+// ROI: in this case it is a single point determined by its longitude and latitude
 var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
 
 // access image collection, filter for location and range of dates
