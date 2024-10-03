@@ -57,30 +57,15 @@ The sections of the Google Earth Engine documentation that are the most relevant
 
 </details>
 
-<details>
-  
-  <summary>Fully functional scripts </summary>
-
-- Basic access to Sentinel-2 data: [basic_S2_composite.js](basic_S2_composite.js)
-- Create basic Sentinel-2 (median) temporal composite: [basic_temporal_composite.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/basic_temporal_composite.js)
-- Access Sentinel-2 data and create a basic NDVI chart: [basic_NDVI_chart.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/basic_NDVI_chart.js) 
-- Access Sentinel-2 data and create a basic NDVI chart with built-in cloud screening: [QA_screening_NDVI_chart.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/QA_screening_NDVI_chart.js)
-- Access Sentinel-2 data and create a basic NDVI chart with cs-Plus cloud screening: [csPlus_screening_NDVI_chart.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/csPlus_screening_NDVI_chart.js)
-- Access Sentinel-2 data and create a multi-point NDVI chart with cs-Plus cloud screening: [points_cs_charts.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/points_cs_charts.js)
-
-</details>
-
 ---
 ## Tutorial topics
-
-
 
 ### Access image collection (Sentinel-2)
 <details>
   
   <summary>Access, filter and plot Sentinel-2 image collection</summary>
 
-* Link to script for basic access to Sentinel-2 data: [basic_S2_composite.js](basic_S2_composite.js)
+* Link to script for basic access to Sentinel-2 data: [basic_S2_composite.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/basic_S2_composite.js)
   
 The script accesses Sentinel-2, level 2A images and it filters by dates and by bounds: here, the region of interest `geometry` is a single point defined by its coordinates. All Sentinel-2 tiles that *intersect* the geometry are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection`. Note that sorting the collection by the property `CLOUDY_PIXEL_PERCENTAGE` should be applied last since it is computationally more demanding.
 
@@ -121,9 +106,12 @@ Map.addLayer(S2.first(), {bands: ['B8', 'B4', 'B3'], min: [0,0,0], max: [4500, 3
   
   <summary> Select images with low cloud cover and combine them into a single image </summary>
 
+  * Link to script for  to create basic Sentinel-2 (median) temporal composite: [basic_temporal_composite.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/basic_temporal_composite.js)
+
 The idea is to filter the Sentinel-2 image collection using the property `CLOUDY_PIXEL_PERCENTAGE`. Only images with less than 1% cloud cover are selected. Then selected images are combined with a *temporal reducer* which can be for instance the `mean` or the `median`.
 
 ```
+// ROI: in this case it is a single point determined by its longitude and latitude
 var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
 
 // access image collection, select 10 m bands, filter for location and range of dates
@@ -184,9 +172,12 @@ image = image.addBands([ndvi])
   
   <summary> Function, map and temporal chart </summary>
 
+* Link to script for access Sentinel-2 data and create a basic NDVI chart: [basic_NDVI_chart.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/basic_NDVI_chart.js) 
+
 The idea is to add the NDVI band to each image of a Sentinel-2 collection, and plot the NDVI values at a certain location along time with `ui.Chart.image.seriesByRegion`: see https://developers.google.com/earth-engine/guides/charts_overview and https://developers.google.com/earth-engine/guides/charts_image_collection for an overview of charts in GEE.
 
 ```
+// ROI: in this case it is a single point determined by its longitude and latitude
 var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
 
 // access image collection, filter for location and range of dates
@@ -237,7 +228,14 @@ print(chart);
   
   <summary> Cloud screening with Sentinel-2 QA band </summary>
 
+* Link to script for access Sentinel-2 data and create a basic NDVI chart with built-in cloud screening: [QA_screening_NDVI_chart.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/QA_screening_NDVI_chart.js)
+
+In this script, we filter clouds using two distinct strategies:
+  - Using the property `CLOUDY_PIXEL_PERCENTAGE` for the whole tile: we select only tiles that have a cloud cover under a certain threshold we define;
+  - Using the built-in *band* `QA60`of the Sentinel-2 Surface Reflectance product; this allow us to mask individual pixels within an image independently of the cloud cover.
+  
 ```
+// ROI: in this case it is a single point determined by longitude and latitude
 var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
 
 /**
@@ -313,9 +311,12 @@ print(chart);
   
   <summary> Cloud screening with Cloud Score+ </summary>
 
+* Link to script for  access Sentinel-2 data and create a basic NDVI chart with cs-Plus cloud screening: [csPlus_screening_NDVI_chart.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/csPlus_screening_NDVI_chart.js)
+  
 Cloud Score+ is a Google product that is derived from Sentinel-2 [https://ieeexplore.ieee.org/document/10208818] and that can be combined with Sentinel-2 imagery to mask pixels with cloud score above some given threshold. The code below uses the `linkCollection` method to combine the Sentinel-2 collection with the Cloud Score+ collection. By default, the match is based on the `system:index` image property.
 
 ```
+// ROI: in this case it is a single point determined by its longitude and latitude
 var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
 
 // Cloud Score+ image collection. Note Cloud Score+ is produced from Sentinel-2
@@ -378,13 +379,19 @@ print(chart);
   
   <summary> Multi-point NDVI charts with Cloud Score+ screening </summary>
 
-The Google Code Editor 
+* Link to script for  access Sentinel-2 data and create a multi-point NDVI chart with cs-Plus cloud screening: [points_cs_charts.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/points_cs_charts.js)
+
+The Google Code Editor allows us to digitize geometries (points, lines or polygons) and add those geometries to our scripts. This can be used to extract a list of point coordinates. Then, the coordinates can be copied into a list and used to define a feature collection.
 
 ```
+// ROI: in this case it is a feature collection of points
+// Firstly, we obtain a list os points possibly by digitizing with the code editor interactive tools
 var multipoints =[[-9.18511947486878, 38.70673673565854],
          [-9.185698832015996, 38.707121861392295],
          [-9.184983887235997, 38.70708122565936]];
 
+// the following code read each point from the list, and adds it as a `ee.Geometry.Point` to a feature collection. 
+// As a result, the variable  `geometry` below is a feature collection of single part point geometries.
 var geometry = ee.FeatureCollection(multipoints.map(function(p){
   var point = ee.Feature(ee.Geometry.Point(p), {})
   return point
