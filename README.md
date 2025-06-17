@@ -2,7 +2,7 @@
 
 Tutorial: Brief Introduction to the Google Earth Engine (October 2-9, 2024)
 
-Main goal: learn how to use the GEE to create 10 meter resolution Sentinel-2 NDVI charts for chosen locations
+Main goal: learn how to use the GEE to create 10 meter resolution Sentinel-2 NDVI time series charts for chosen locations
 
 Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18-3B3C-06BB)
 
