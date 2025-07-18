@@ -22,3 +22,9 @@ The tutorial will be *hands-on* using either
 Earth Engine Data Catalog:
 1. [https://developers.google.com/earth-engine/datasets](https://developers.google.com/earth-engine/datasets)
 2. 
+
+Interesting links for geospatial:
+- [OpenGeos](https://github.com/opengeos): geemap, GeoAI, ...
+
+Advanced processing examples
+- [GeoAI Tutorial 19: Train a Segmentation Model for Objection Detection from Remote Sensing Imagery](https://www.youtube.com/watch?v=l8DY166eAWI)
