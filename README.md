@@ -14,8 +14,7 @@ Before the tutorial, please sign up for Google Earth Engine and crete Google Clo
 
 The tutorial will be *hands-on* using either 
 1. The GEE code editor (javascript). The [guideline](tutorial_v1.pdf) for the tutorial is a selection of pages from [https://developers.google.com/earth-engine](https://developers.google.com/earth-engine) where one can find code descriptions and examples that illustrate topics like finding and filtering data (spatially, temporally and spectrally), visualizing images, creating charts, creating new images and bands, and exporting data.
-2.  The Python API
-  Recommended tutorial [Earth Engine and Geemap Workshop at CVPR Conference 2025](https://www.youtube.com/watch?v=Us6MaBsL4cg)
+2.  The Python API and [geemap](https://geemap.org/). Recommended tutorial [Earth Engine and Geemap Workshop at CVPR Conference 2025](https://www.youtube.com/watch?v=Us6MaBsL4cg)
 
 ---
 
