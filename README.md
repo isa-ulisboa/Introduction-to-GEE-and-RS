@@ -53,7 +53,7 @@ Scripts are written in *javascript* and uploaded data can either be stored in th
   
   <summary>Example: access, filter and create layer from Sentinel-2 image collection</summary>
   
-[Open script on GGE code editor](https://code.earthengine.google.com/e4b1ab0b4e741ff51088a8fd4ce673fe?noload=true)
+[Open script on GGE code editor](https://code.earthengine.google.com/307ecc36c256f4490beb4483e6797f40?noload=true)
 
 The script accesses Sentinel-2, level 2A images and it filters by dates and by bounds: here, the region of interest `geometry` is a single point defined by its coordinates. All Sentinel-2 tiles that *intersect* the geometry are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection`. Note that sorting the collection by the property `CLOUDY_PIXEL_PERCENTAGE` should be applied last since it is computationally more demanding. 
 
@@ -96,7 +96,7 @@ Map.addLayer(S2.first(), {bands: ['B8', 'B4', 'B3'], min: [0,0,0], max: [4500, 3
 4. Click `Upload`
 5. Go to `Tasks` and confirm that the table is *ingested*.
 
-The asset should then be available in  `ASSETS`. It can be imported to the script with `Import`. You can change the *table* name, to define your own variable of type `FeatureCollection`. The line of code that will be something like
+The asset should then be available in  `ASSETS`. It can be imported to the script with `Import`. You can change the *table* name, to define your own variable of type `FeatureCollection`. The line of code in your script will be something like:
 ```
 // Import the vector asset as a FeatureCollection
 var saoMiguelCounties = ee.FeatureCollection('projects/ee-my-mlc-math-isa-utl/assets/saomiguel_counties_latlong_');
@@ -110,7 +110,7 @@ Map.centerObject(saoMiguelCounties, 12);
 Map.addLayer(saoMiguelCounties, {}, 'São Miguel Counties');
 ```
 
-If you do not have a shapefile that defines your ROI, you can build one: just execute this [script]() on Google Colab.
+If you do not have a shapefile that defines your ROI, you can build one: just execute this [script](create_shapefile_ponta_Delgada.ipynb) on Google Colab.
 
 </details>
 
