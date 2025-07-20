@@ -6,24 +6,24 @@ Instructor: [Manuel Campagnolo ISA/ULisboa](https://www.cienciavitae.pt//en/7F18
 
 ---
 
-Considering [assessment quiz results](Student_Assessment_Quiz.pdf) and time limitations, we'll focus on the following topics:
+Considering [assessment quiz results](Student_Assessment_Quiz.pdf) and time limitations, we'll focus on the following general topics:
 - accessing and processing data
 - using Python API and geemap
-- image preprocessing 
 - combine satellite raster data with other geospatial data
+- image preprocessing 
 - temporal profiles 
 
-Before the tutorial, please sign up for Google Earth Engine and create Google Cloud project at [Earth Engine](https://console.cloud.google.com/earth-engine/welcome ).
+Required: sign up for Google Earth Engine and create Google Cloud project at [Earth Engine](https://console.cloud.google.com/earth-engine/welcome).
+
+---
+## Access to the Earth Engine
+
+1. The [GEE code editor](https://code.earthengine.google.com/) (javascript). The main reference is [https://developers.google.com/earth-engine](https://developers.google.com/earth-engine). I selected some basic topics and combined them in this [guideline (pdf)](tutorial_v1.pdf). Exercises and code on topics like finding and filtering data (spatially, temporally and spectrally), visualizing images, creating charts, creating new images and bands, and exporting data are available at [Smooth introduction to the GEE code editor with examples](cloud_screening_and_temporal_charts_with_code_editor.md).
+2.  The [Python API](https://developers.google.com/earth-engine/tutorials/community/intro-to-python-api) and [geemap](https://geemap.org/). Most recent available geemap tutorial: [Earth Engine and Geemap Workshop at CVPR Conference 2025](https://www.youtube.com/watch?v=Us6MaBsL4cg)
 
 ---
 
-The tutorial will be *hands-on* using either 
-1. The GEE code editor (javascript). The [guideline](tutorial_v1.pdf) for the tutorial is a selection of pages from [https://developers.google.com/earth-engine](https://developers.google.com/earth-engine) where one can find code descriptions and examples that illustrate topics like finding and filtering data (spatially, temporally and spectrally), visualizing images, creating charts, creating new images and bands, and exporting data.
-2.  The [Python API](https://developers.google.com/earth-engine/tutorials/community/intro-to-python-api) and [geemap](https://geemap.org/). Recommended tutorial: [Earth Engine and Geemap Workshop at CVPR Conference 2025](https://www.youtube.com/watch?v=Us6MaBsL4cg)
-
----
-
-Topics:
+## Tutorial topics
 
 <details>
   
@@ -92,6 +92,9 @@ If you want to plot a false color composite, you can use instead
 ```
 Map.addLayer(S2.first(), {bands: ['B8', 'B4', 'B3'], min: [0,0,0], max: [4500, 3500, 3500]}, 'Sentinel-2 level 2A RGB=843');
 ```
+
+For further exercises with Sentinel-2, see [Smooth introduction to the GEE code editor with examples](cloud_screening_and_temporal_charts_with_code_editor.md).
+
 </details>
 
 ---
@@ -145,7 +148,7 @@ ee.Authenticate()
 ee.Initialize(project='my-project') # replace 'my-project' by your own project ID
 ```
 
-**To do**.  execute the notebook: [setup the Earth Engine Python API in Colab](https://github.com/google/earthengine-community/blob/master/guides/linked/ee-api-colab-setup.ipynb)
+**To do**: run the notebook [setup the Earth Engine Python API in Colab](https://github.com/google/earthengine-community/blob/master/guides/linked/ee-api-colab-setup.ipynb)
 
 </details>
 
@@ -153,7 +156,7 @@ ee.Initialize(project='my-project') # replace 'my-project' by your own project I
 
 <details>
   
-  <summary>(Advanced) Uploading a ocal shapefile to Google Earth Engine with Python</summary>
+  <summary>(Advanced) Uploading a local shapefile into Google Earth Engine with Python</summary>
 
 Directly uploading a shapefile from your local drive to Google Earth Engine as an asset cannot be done solely with `ee` or `geemap` in Python. However, an automated workflow is possible through a combination of Google Cloud Storage (GCS), the Earth Engine CLI, and Python scripting:
 - geemap: Lets you visualize and manipulate shapefiles in-memory in Earth Engine FeatureCollections—great for immediate analysis but does not persist data as an Earth Engine asset for future use.
@@ -164,7 +167,7 @@ Note: `geemap` provides session-based (i.e. not persistent) tools to upload geor
 - `csv_to_ee`: convert a CSV containing point coordinates (latitude and longitude) into an Earth Engine FeatureCollection within your Python environment. Input: A CSV file (can be a local path or URL) that includes columns for latitude and longitude. Output: An in-memory Earth Engine FeatureCollection created from the CSV points. See https://geemap.org/notebooks/74_csv_to_points/
 - `shp_to_ee`:  import a local shapefile and convert it into an Earth Engine FeatureCollection within a Python environment such as Jupyter Notebook. For advanced control (such as GeoDataFrame transformations), consider loading with geopandas and then converting using `geemap.gdf_to_ee`.
 
-**To do**. Adapt the following code and execute to read a local shapefile and map it in your notebook.
+**To do**: adapt the following code and execute to read a local shapefile and map it in your notebook.
 ```
 countries_path = '/path/to/countries.shp'
 countries_fc = geemap.shp_to_ee(countries_path)
@@ -187,7 +190,7 @@ This is especially useful for quickly bringing tabular point data into your Eart
 
 **To do**: Execute [notebook to read and export images or image collections with geemap](https://geemap.org/notebooks/11_export_image/). 
 
-Warning: You may run in in several errors when trying to execute the code. You must make some changes in the code to address the following issues.
+Warning: You may run into errors when trying to execute the code. To prevent that, you must make some changes in the code to address the following issues. A clean script is available [here](geemap_export_image_revised.py).
 1. You need to authenticate and initialize your project
   ```
   ee.Authenticate()
@@ -201,7 +204,7 @@ Warning: You may run in in several errors when trying to execute the code. You m
   from google.colab import files
   files.download(filename) # local filename
   ```
-4. File size limit. You can create a smaller file to export by setting the `scale` as in `geemap.ee_export_image_collection(collection, out_dir=out_dir, scale=1000)`
+4. File size limit. If you get an error message because the amount of data is too large, you can create a smaller file to export by increasing the `scale` as in `geemap.ee_export_image_collection(collection, out_dir=out_dir, scale=100)`
 
 5. In section *Extract pixels as a Numpy array*, replace existing code by the following:
   ```
@@ -226,12 +229,8 @@ Warning: You may run in in several errors when trying to execute the code. You m
 
 ---
 
-Earth Engine Data Catalog:
-1. [https://developers.google.com/earth-engine/datasets](https://developers.google.com/earth-engine/datasets)
-2. [GEE community catalog](https://gee-community-catalog.org/)
+## Some useful links:
 
-Interesting links for geospatial:
-- [OpenGeos](https://github.com/opengeos): geemap, GeoAI, ...
-
-Advanced processing examples
-- [GeoAI Tutorial 19: Train a Segmentation Model for Objection Detection from Remote Sensing Imagery](https://www.youtube.com/watch?v=l8DY166eAWI)
+1. Earth Engine Data Catalog: [https://developers.google.com/earth-engine/datasets](https://developers.google.com/earth-engine/datasets)
+2. Community catalog with a large variety of data sets: [GEE community catalog](https://gee-community-catalog.org/)
+3. Geospatial processing packages: [OpenGeos](https://github.com/opengeos): geemap, GeoAI, ...
