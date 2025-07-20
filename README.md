@@ -122,9 +122,29 @@ If you do not have a shapefile that defines your ROI, you can build one: just ex
 
 <details>
   
-  <summary>(Advanced) Uploading a Local Shapefile to Google Earth Engine Programmatically in Jupyter</summary>
+  <summary>Earth Engine Python API and geemap</summary>
 
-Directly uploading a shapefile from your local drive to Google Earth Engine as an asset cannot be done solely with ee or geemap in Python. However, an automated workflow is possible through a combination of Google Cloud Storage (GCS), the Earth Engine CLI, and Python scripting:
+The open source Python Client library translate Earth Engine code into request objects sent to Earth Engine servers: 
+  - `ee` package for formulating requests to Earth Engine. 
+  - Export of data to Google Drive, Cloud Storage or Earth Engine assets.
+
+Authenticate and initialize: execute the following notebook: [setup the Earth Engine Python API in Colab](https://github.com/google/earthengine-community/blob/master/guides/linked/ee-api-colab-setup.ipynb)
+```
+# Import the API
+import ee
+# Trigger the authentication flow.
+ee.Authenticate()
+# Initialize the library.
+ee.Initialize(project='my-project') # replace 'my-project' by your own project ID
+```
+
+</details>
+
+<details>
+  
+  <summary>(Advanced) Uploading a Local Shapefile to Google Earth Engine with Python</summary>
+
+Directly uploading a shapefile from your local drive to Google Earth Engine as an asset cannot be done solely with `ee` or `geemap` in Python. However, an automated workflow is possible through a combination of Google Cloud Storage (GCS), the Earth Engine CLI, and Python scripting:
 - geemap: Lets you visualize and manipulate shapefiles in-memory in Earth Engine FeatureCollections—great for immediate analysis but does not persist data as an Earth Engine asset for future use.
 - Earth Engine Python API: Does not support direct asset upload from your local drive.
 - Asset uploads: Must use either the web-based Asset Manager or automate the workflow via GCS and the Earth Engine CLI, both of which can be wrapped in Python scripts.
@@ -147,18 +167,50 @@ This is especially useful for quickly bringing tabular point data into your Eart
 
 </details>
 
+
+
 <details>
   
-  <summary>Earth Engine Python API and geemap</summary>
+  <summary>Export images with geemap</summary>
 
-The open source Python Client library translate Earth Engine code into request objects sent to Earth Engine servers: 
-  - `ee` package for formulating requests to Earth Engine. 
-  - Export of data to Google Drive, Cloud Storage or Earth Engine assets.
+**To do**: Execute [notebook to read and export images or image collections with geemap](https://geemap.org/notebooks/11_export_image/). 
 
-**To do**: Create a jupyter notebook . Suggestion: you can create an execute your notebook in **Google Colab**.
+Warning: You may run in in several errors when trying to execute the code. You must make some changes in the code to address the following issues.
+1. You need to authenticate and initialize your project
+  ```
+  ee.Authenticate()
+  ee.Initialize(project='my-project') # replace 'my-project' by your own project ID
+  ```
+2. Adapt `out_dir`. For instance `out_dir = '/content'` if you want to save the tif file to the Colab environment.
+3. After your tif file is saved in the  Colab environment, you can either
+- download manually to your local machine; or
+- use `files.download` as in
+  ```
+  from google.colab import files
+  files.download(filename) # local filename
+  ```
+4. File size limit. You can create a smaller file to export by setting the `scale` as in `geemap.ee_export_image_collection(collection, out_dir=out_dir, scale=1000)`
 </details>
 
-
+5. In section *Extract pixels as a Numpy array*, replace existing code by the following:
+```
+import ee
+import geemap
+import numpy as np
+import matplotlib.pyplot as plt
+# read Harmonized Landsat Sentinel-2 (HLS)  image (resolution 30 m)
+img = ee.Image("NASA/HLS/HLSS30/v002/T12RXT_20240425T174911").select(["B4", "B5", "B6"])
+# define buffer within the image
+point=ee.Geometry.Point(-109.53, 29.19)
+aoi=point.buffer(10000)
+# create numpy array
+rgb_img = geemap.ee_to_numpy(img,region=aoi)
+print(rgb_img.shape)
+# Scale the data to [0, 255] to show as an RGB image.
+rgb_img_test = (255*(rgb_img[:, :, 0:3]-0.01)/0.18).astype("uint8")
+plt.imshow(rgb_img_test)
+plt.show()
+```
 
 
 Earth Engine Data Catalog:
