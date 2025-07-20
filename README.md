@@ -37,6 +37,8 @@ The GEE is one of several available **geospatial processing services** offering 
 5. ...
 </details>
 
+---
+
 <details>
   
   <summary>Earth Engine Code Editor and documentation</summary>
@@ -54,6 +56,7 @@ Scripts are written in *javascript* and uploaded data can either be stored in th
 
 </details>
 
+---
 
 <details>
   
@@ -91,34 +94,38 @@ Map.addLayer(S2.first(), {bands: ['B8', 'B4', 'B3'], min: [0,0,0], max: [4500, 3
 ```
 </details>
 
+---
 
 <details>
   
-  <summary>(Optional) Upload a shapefile to Earth Engine and use it as the ROI</summary>
+  <summary>(Optional) Upload a shapefile into Earth Engine</summary>
+
+Often, you need to define your region of interest (ROI). This can be a single point which is easy to define on the code editor or it can be a complicated geometry that is available as a shapefile.
+
+Let's suppose you want to upload you own shapefile so it become available for processing in GEE. Use your own shapefile or, if you prefer, download this shapefile that delineates the [Ponta Delgada county](saomiguel_counties_latlong_.zip). Note: This shapefile was created in Google Colab with this [script](create_shapefile_ponta_Delgada.ipynb), so it can be easily adapted.
 
 1. Go to assets on the GEE code editor;
 2. Click `New` and choose `Shape files`;
-3. Select the files for the shapefile (either `.zip`or at least `.dbf`, `.prj`, `.shp` and `.shx`)
+3. Select the files for the shapefile (either `.zip` or at least `.dbf`, `.prj`, `.shp` and `.shx`)
 4. Click `Upload`
 5. Go to `Tasks` and confirm that the table is *ingested*.
 
-The asset should then be available in  `ASSETS`. It can be imported to the script with `Import`. You can change the *table* name, to define your own variable of type `FeatureCollection`. The line of code in your script will be something like:
+The asset should then become available in your Earth Engine `ASSETS`. It can be imported to the script and adapted into smth like:
 ```
 // Import the vector asset as a FeatureCollection
 var saoMiguelCounties = ee.FeatureCollection('projects/ee-my-mlc-math-isa-utl/assets/saomiguel_counties_latlong_');
 ```
-You can also:
+(Optional) you can also:
 ```
 // Center the map on São Miguel 
 Map.centerObject(saoMiguelCounties, 12);
-
 // Add the asset to the map
 Map.addLayer(saoMiguelCounties, {}, 'São Miguel Counties');
 ```
 
-If you do not have a shapefile that defines your ROI, you can build one: just execute this [script](create_shapefile_ponta_Delgada.ipynb) on Google Colab.
-
 </details>
+
+---
 
 <details>
   
@@ -128,7 +135,7 @@ The open source Python Client library translate Earth Engine code into request o
   - `ee` package for formulating requests to Earth Engine. 
   - Export of data to Google Drive, Cloud Storage or Earth Engine assets.
 
-Authenticate and initialize: execute the following notebook: [setup the Earth Engine Python API in Colab](https://github.com/google/earthengine-community/blob/master/guides/linked/ee-api-colab-setup.ipynb)
+To be able to use the Python API you need first to authenticate and initialize your project:
 ```
 # Import the API
 import ee
@@ -138,22 +145,26 @@ ee.Authenticate()
 ee.Initialize(project='my-project') # replace 'my-project' by your own project ID
 ```
 
+**To do**.  execute the notebook: [setup the Earth Engine Python API in Colab](https://github.com/google/earthengine-community/blob/master/guides/linked/ee-api-colab-setup.ipynb)
+
 </details>
+
+---
 
 <details>
   
-  <summary>(Advanced) Uploading a Local Shapefile to Google Earth Engine with Python</summary>
+  <summary>(Advanced) Uploading a ocal shapefile to Google Earth Engine with Python</summary>
 
 Directly uploading a shapefile from your local drive to Google Earth Engine as an asset cannot be done solely with `ee` or `geemap` in Python. However, an automated workflow is possible through a combination of Google Cloud Storage (GCS), the Earth Engine CLI, and Python scripting:
 - geemap: Lets you visualize and manipulate shapefiles in-memory in Earth Engine FeatureCollections—great for immediate analysis but does not persist data as an Earth Engine asset for future use.
 - Earth Engine Python API: Does not support direct asset upload from your local drive.
 - Asset uploads: Must use either the web-based Asset Manager or automate the workflow via GCS and the Earth Engine CLI, both of which can be wrapped in Python scripts.
 
-Note: `geemap` provides session-based methods to upload georeferenced data:
+Note: `geemap` provides session-based (i.e. not persistent) tools to upload georeferenced data:
 - `csv_to_ee`: convert a CSV containing point coordinates (latitude and longitude) into an Earth Engine FeatureCollection within your Python environment. Input: A CSV file (can be a local path or URL) that includes columns for latitude and longitude. Output: An in-memory Earth Engine FeatureCollection created from the CSV points. See https://geemap.org/notebooks/74_csv_to_points/
 - `shp_to_ee`:  import a local shapefile and convert it into an Earth Engine FeatureCollection within a Python environment such as Jupyter Notebook. For advanced control (such as GeoDataFrame transformations), consider loading with geopandas and then converting using `geemap.gdf_to_ee`.
 
-Example:
+**To do**. Adapt the following code and execute to read a local shapefile and map it in your notebook.
 ```
 countries_path = '/path/to/countries.shp'
 countries_fc = geemap.shp_to_ee(countries_path)
@@ -162,11 +173,12 @@ Map.addLayer(countries_fc, {}, 'Countries')
 Map
 ```
 
-This is especially useful for quickly bringing tabular point data into your Earth Engine workflow. The resulting FeatureCollection is not persisted as a Google Earth Engine asset—it is only available for use in your current Python or notebook session.
+This is especially useful for quickly bringing tabular point data into your Earth Engine workflow. The resulting FeatureCollection is not persisted as a Google Earth Engine asset; it is only available for use in your current Python or notebook session.
 
 
 </details>
 
+---
 
 
 <details>
@@ -190,28 +202,29 @@ Warning: You may run in in several errors when trying to execute the code. You m
   files.download(filename) # local filename
   ```
 4. File size limit. You can create a smaller file to export by setting the `scale` as in `geemap.ee_export_image_collection(collection, out_dir=out_dir, scale=1000)`
-</details>
 
 5. In section *Extract pixels as a Numpy array*, replace existing code by the following:
-```
-import ee
-import geemap
-import numpy as np
-import matplotlib.pyplot as plt
-# read Harmonized Landsat Sentinel-2 (HLS)  image (resolution 30 m)
-img = ee.Image("NASA/HLS/HLSS30/v002/T12RXT_20240425T174911").select(["B4", "B5", "B6"])
-# define buffer within the image
-point=ee.Geometry.Point(-109.53, 29.19)
-aoi=point.buffer(10000)
-# create numpy array
-rgb_img = geemap.ee_to_numpy(img,region=aoi)
-print(rgb_img.shape)
-# Scale the data to [0, 255] to show as an RGB image.
-rgb_img_test = (255*(rgb_img[:, :, 0:3]-0.01)/0.18).astype("uint8")
-plt.imshow(rgb_img_test)
-plt.show()
-```
+  ```
+  import ee
+  import geemap
+  import numpy as np
+  import matplotlib.pyplot as plt
+  # read Harmonized Landsat Sentinel-2 (HLS)  image (resolution 30 m)
+  img = ee.Image("NASA/HLS/HLSS30/v002/T12RXT_20240425T174911").select(["B4", "B5", "B6"])
+  # define buffer within the image
+  point=ee.Geometry.Point(-109.53, 29.19)
+  aoi=point.buffer(10000)
+  # create numpy array
+  rgb_img = geemap.ee_to_numpy(img,region=aoi)
+  print(rgb_img.shape)
+  # Scale the data to [0, 255] to show as an RGB image.
+  rgb_img_test = (255*(rgb_img[:, :, 0:3]-0.01)/0.18).astype("uint8")
+  plt.imshow(rgb_img_test)
+  plt.show()
+  ```
+</details>
 
+---
 
 Earth Engine Data Catalog:
 1. [https://developers.google.com/earth-engine/datasets](https://developers.google.com/earth-engine/datasets)
