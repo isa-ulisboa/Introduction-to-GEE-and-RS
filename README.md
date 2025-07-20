@@ -17,6 +17,12 @@ Before the tutorial, please sign up for Google Earth Engine and create Google Cl
 
 ---
 
+The tutorial will be *hands-on* using either 
+1. The GEE code editor (javascript). The [guideline](tutorial_v1.pdf) for the tutorial is a selection of pages from [https://developers.google.com/earth-engine](https://developers.google.com/earth-engine) where one can find code descriptions and examples that illustrate topics like finding and filtering data (spatially, temporally and spectrally), visualizing images, creating charts, creating new images and bands, and exporting data.
+2.  The [Python API](https://developers.google.com/earth-engine/tutorials/community/intro-to-python-api) and [geemap](https://geemap.org/). Recommended tutorial: [Earth Engine and Geemap Workshop at CVPR Conference 2025](https://www.youtube.com/watch?v=Us6MaBsL4cg)
+
+---
+
 Topics:
 
 <details>
@@ -114,6 +120,32 @@ If you do not have a shapefile that defines your ROI, you can build one: just ex
 
 </details>
 
+<details>
+  
+  <summary>(Advanced) Uploading a Local Shapefile to Google Earth Engine Programmatically in Jupyter</summary>
+
+Directly uploading a shapefile from your local drive to Google Earth Engine as an asset cannot be done solely with ee or geemap in Python. However, an automated workflow is possible through a combination of Google Cloud Storage (GCS), the Earth Engine CLI, and Python scripting:
+- geemap: Lets you visualize and manipulate shapefiles in-memory in Earth Engine FeatureCollections—great for immediate analysis but does not persist data as an Earth Engine asset for future use.
+- Earth Engine Python API: Does not support direct asset upload from your local drive.
+- Asset uploads: Must use either the web-based Asset Manager or automate the workflow via GCS and the Earth Engine CLI, both of which can be wrapped in Python scripts.
+
+Note: `geemap` provides session-based methods to upload georeferenced data:
+- `csv_to_ee`: convert a CSV containing point coordinates (latitude and longitude) into an Earth Engine FeatureCollection within your Python environment. Input: A CSV file (can be a local path or URL) that includes columns for latitude and longitude. Output: An in-memory Earth Engine FeatureCollection created from the CSV points. See https://geemap.org/notebooks/74_csv_to_points/
+- `shp_to_ee`:  import a local shapefile and convert it into an Earth Engine FeatureCollection within a Python environment such as Jupyter Notebook. For advanced control (such as GeoDataFrame transformations), consider loading with geopandas and then converting using `geemap.gdf_to_ee`.
+
+Example:
+```
+countries_path = '/path/to/countries.shp'
+countries_fc = geemap.shp_to_ee(countries_path)
+Map = geemap.Map()
+Map.addLayer(countries_fc, {}, 'Countries')
+Map
+```
+
+This is especially useful for quickly bringing tabular point data into your Earth Engine workflow. The resulting FeatureCollection is not persisted as a Google Earth Engine asset—it is only available for use in your current Python or notebook session.
+
+
+</details>
 
 <details>
   
@@ -128,11 +160,6 @@ The open source Python Client library translate Earth Engine code into request o
 
 
 
-The tutorial will be *hands-on* using either 
-1. The GEE code editor (javascript). The [guideline](tutorial_v1.pdf) for the tutorial is a selection of pages from [https://developers.google.com/earth-engine](https://developers.google.com/earth-engine) where one can find code descriptions and examples that illustrate topics like finding and filtering data (spatially, temporally and spectrally), visualizing images, creating charts, creating new images and bands, and exporting data.
-2.  The Python API and [geemap](https://geemap.org/). Recommended tutorial [Earth Engine and Geemap Workshop at CVPR Conference 2025](https://www.youtube.com/watch?v=Us6MaBsL4cg)
-
----
 
 Earth Engine Data Catalog:
 1. [https://developers.google.com/earth-engine/datasets](https://developers.google.com/earth-engine/datasets)
