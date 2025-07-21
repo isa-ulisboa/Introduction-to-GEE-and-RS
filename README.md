@@ -229,6 +229,20 @@ Warning: You may run into errors when trying to execute the code. To prevent tha
 
 ---
 
+
+<details>
+  
+  <summary>Exercise: LAI/FPAR imagery</summary>
+
+Access VNP15A2H: LAI/FPAR 8-Day L4 Global 500m SIN Grid data for a given location and plot LAI and FPAR along time.
+
+</details>
+
+
+
+
+---
+
 ## Some useful links:
 
 1. Earth Engine Data Catalog: [https://developers.google.com/earth-engine/datasets](https://developers.google.com/earth-engine/datasets)
