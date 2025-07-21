@@ -234,3 +234,5 @@ Warning: You may run into errors when trying to execute the code. To prevent tha
 1. Earth Engine Data Catalog: [https://developers.google.com/earth-engine/datasets](https://developers.google.com/earth-engine/datasets)
 2. Community catalog with a large variety of data sets: [GEE community catalog](https://gee-community-catalog.org/)
 3. Geospatial processing packages: [OpenGeos](https://github.com/opengeos): geemap, GeoAI, ...
+
+Note: When using GEE we are limited by the available data. For instance, [RS for Satellite Monitoring of Ammonia](https://www.frontiersplanetprize.org/news/blog-post-title-four-93k9t-87bsr-ae4yh-m3ktl-cpyt3-93cnl-e2s6n-xd3kd-rhwkr-ztcnp-gdcdd-ynhz5-r6kpe-mnkb2-jwljh-8yhsy-wxezp-xyf4l-5kbwa-4x9ba-3wnd8) relies on  Infrared Atmospheric Sounding Interferometer (IASI) (on Metop European satellites), which is not available in earth engine catalog.
