@@ -1,4 +1,4 @@
-Fonda Summer School, Ponta Delgada, July 2025: Improving Nitrogen Budgets via Satellite Data 
+[Fonda Summer School](https://fonda.web.ua.pt/en/activities-x/summer-school-2025/welcome), Ponta Delgada, July 2025: Improving Nitrogen Budgets via Satellite Data 
 
 Tutorial on remote sensing and Google Earth Engine (July 21, 2025)
 
