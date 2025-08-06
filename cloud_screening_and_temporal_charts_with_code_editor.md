@@ -1,5 +1,7 @@
 ## Smooth introduction to the GEE code editor with examples
 
+[pdf version](cloud_screening_and_temporal_charts_with_code_editor.pdf)
+
 All examples use Sentinel-2 data. 
 
 ### Access image collection (Sentinel-2)
