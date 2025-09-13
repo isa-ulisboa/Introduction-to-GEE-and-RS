@@ -57,12 +57,24 @@ The sections of the Google Earth Engine documentation that are the most relevant
 ---
 ## Tutorial topics
 
+### Open session in the Code Editor
+<details>
+  
+  <summary>Open session and copy Cloud Project name</summary>
+
+1. Go to https://code.earthengine.google.com 
+![Alt text](https://developers.google.com/static/earth-engine/images/Code_editor_diagram.png "Code editor"), choose account, and log in.
+
+2. In your session, copy your Cloud Project name in **Project info**: top right of the window.
+
+</details>
+
 ### Access image collection (Sentinel-2)
 <details>
   
   <summary>Access, filter and plot Sentinel-2 image collection</summary>
 
-* Link to script for basic access to Sentinel-2 data: [basic_S2_composite.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/basic_S2_composite.js)
+For each script listed below, you should copy the script, paste it in the Code Editor and run it. You can then make changes to the script to test different parameter or instructions. You can save the script and give it a name in the Code Editor. You can also share it with the *Get link* button. For instance the first script is available here [GEE link](https://code.earthengine.google.com/ccb1c9392950c87058bd3bf2553fc09c?noload=true).
   
 The script accesses Sentinel-2, level 2A images and it filters by dates and by bounds: here, the region of interest `geometry` is a single point defined by its coordinates. All Sentinel-2 tiles that *intersect* the geometry are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection`. Note that sorting the collection by the property `CLOUDY_PIXEL_PERCENTAGE` should be applied last since it is computationally more demanding.
 
@@ -104,7 +116,7 @@ Map.addLayer(S2.first(), {bands: ['B8', 'B4', 'B3'], min: [0,0,0], max: [4500, 3
   
   <summary> Select images with low cloud cover and combine them into a single image </summary>
 
-  * Link to script for  to create basic Sentinel-2 (median) temporal composite: [basic_temporal_composite.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/basic_temporal_composite.js)
+  * [GEE link](https://code.earthengine.google.com/aca2a78c9a479bd273e1f3848a871729?noload=true)
 
 The idea is to filter the Sentinel-2 image collection using the property `CLOUDY_PIXEL_PERCENTAGE`. Only images with less than 10% cloud cover are selected. Then selected images are combined with a *temporal reducer* which can be for instance the `mean` or the `median`.
 
@@ -168,7 +180,7 @@ image = image.addBands([ndvi])
   
   <summary> Function, map and temporal chart </summary>
 
-* Link to script for access Sentinel-2 data and create a basic NDVI chart: [basic_NDVI_chart.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/basic_NDVI_chart.js) 
+* [GEE link](https://code.earthengine.google.com/ce3bdfe65c7957f6dc69fcd3ab8690ad?noload=true)
 
 The idea is to add the NDVI band to each image of a Sentinel-2 collection, and plot the NDVI values at a certain location along time with `ui.Chart.image.seriesByRegion`: see https://developers.google.com/earth-engine/guides/charts_overview and https://developers.google.com/earth-engine/guides/charts_image_collection for an overview of charts in GEE.
 
@@ -224,11 +236,11 @@ print(chart);
   
   <summary> Cloud screening with Sentinel-2 QA band </summary>
 
-* Link to script for access Sentinel-2 data and create a basic NDVI chart with built-in cloud screening: [QA_screening_NDVI_chart.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/QA_screening_NDVI_chart.js)
+* [GEE link](https://code.earthengine.google.com/5c3034511e023a92a6778f080114e6b0?noload=true)
 
 In this script, we filter clouds using two distinct strategies:
   - Using the property `CLOUDY_PIXEL_PERCENTAGE` for the whole tile: we select only tiles that have a cloud cover under a certain threshold we define;
-  - Using the built-in *band* `QA60`of the Sentinel-2 Surface Reflectance product; this allow us to mask individual pixels within an image independently of the cloud cover.
+  - Using the built-in *band* `QA60` of the Sentinel-2 Surface Reflectance product; this allow us to mask individual pixels within an image independently of the cloud cover.
   
 ```
 // ROI: in this case it is a single point determined by longitude and latitude
@@ -260,7 +272,7 @@ function maskS2clouds(image) {
 // use built-in cloud screening (tile and pixel level)
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
       .filterBounds(geometry)
-      .filterDate('2022-06-01', '2024-09-30')
+      .filterDate('2022-06-01', '2025-08-30')
       .select(['B8', 'B4','QA60'])
       // Pre-filter to get less cloudy granules.
       .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',20))
@@ -307,7 +319,7 @@ print(chart);
   
   <summary> Cloud screening with Cloud Score+ </summary>
 
-* Link to script for  access Sentinel-2 data and create a basic NDVI chart with cs-Plus cloud screening: [csPlus_screening_NDVI_chart.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/csPlus_screening_NDVI_chart.js)
+* [GEE link](https://code.earthengine.google.com/e0ae77714f821964624366747f239286?noload=true)
   
 Cloud Score+ is a Google product that is derived from Sentinel-2 [https://ieeexplore.ieee.org/document/10208818] and that can be combined with Sentinel-2 imagery to mask pixels with cloud score above some given threshold. The code below uses the `linkCollection` method to combine the Sentinel-2 collection with the Cloud Score+ collection. By default, the match is based on the `system:index` image property.
 
@@ -375,7 +387,7 @@ print(chart);
   
   <summary> Multi-point NDVI charts with Cloud Score+ screening </summary>
 
-* Link to script for  access Sentinel-2 data and create a multi-point NDVI chart with cs-Plus cloud screening: [points_cs_charts.js](https://github.com/isa-ulisboa/Introduction-to-GEE-and-RS/blob/agri_digital/points_cs_charts.js)
+* [GEE link](https://code.earthengine.google.com/e56c71cc7333ea27f1e803155d13aded?noload=true)
 
 The Google Code Editor allows us to digitize geometries (points, lines or polygons) and add those geometries to our scripts. This can be used to extract a list of point coordinates. Then, the coordinates can be copied into a list and used to define a feature collection.
 
@@ -409,7 +421,7 @@ var CLEAR_THRESHOLD = 0.60;
 // sort by percentage of clouds (most cloudier first)
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
       .filterBounds(geometry)
-      .filterDate('2022-06-01', '2024-09-30')
+      .filterDate('2022-06-01', '2025-08-30')
       .select(['B8', 'B4'])
       .linkCollection(csPlus, [QA_BAND])
       .map(function(img) {
@@ -423,8 +435,17 @@ Map.centerObject(geometry, 16);
 // print to console
 print(S2);
 
-// Add geometry to the map
-Map.addLayer(geometry, {color: 'red'}, 'Vinha ISA');
+// Add geometry to the map; each feature with a corresponding color
+// define function for that task
+function addColoredFeatures(geometry, colors) {
+  var featuresList = geometry.toList(geometry.size());
+  for (var i = 0; i < colors.length; i++) {
+    var feature = ee.Feature(featuresList.get(i));
+    Map.addLayer(feature, {color: colors[i]}, 'Feature ' + (i+1));
+  }
+}
+// apply function with the chosen list of colors (that match the chart below)
+addColoredFeatures(geometry, ['blue','red','green'])
 
 // Add NDVI to one image
 var add_ndvi_to_s2 = function(image) {
@@ -455,7 +476,7 @@ var chart =
             titleTextStyle: {italic: false, bold: true}
           },
           lineWidth: 2,
-          colors: ['blue','red','green'], //['blue', 'yellow', 'green','red','brown','purple'],
+          colors: ['blue','red','green'], 
         });
         
 print(chart);
@@ -468,7 +489,11 @@ print(chart);
   
   <summary> Export.image.toDrive </summary>
 
-In this exercise, we creta e cloud masked 
+A common use of the Google Earth Engine is to access and preprocess image collections. Then the preprocessed data can be saved in Google Drive and used for further processing.
+
+In this exercise, we download a time composite of a Sentinel image, after masking cloudy pixels, and performing a temporal reduction with the **median** for a region defined by a 1km buffer around a given location location.
+
+[GEE link](https://code.earthengine.google.com/8c939309e948b0d9ea86dffea4c34c41?noload=true)
   
 ```
 // ROI: in this case it is a single point determined by its longitude and latitude
@@ -493,9 +518,8 @@ var S2clear = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
       .select(['B8', 'B4','B3'])
       .linkCollection(csPlus, [QA_BAND])
       .map(function(img) {
-        return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD))
+        return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD))})
       .median();
-    })
 
 // export to drive
 // Set the export "scale" and "crs" parameters
