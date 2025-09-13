@@ -10,7 +10,6 @@ Instructor: [Manuel Campagnolo ISA/ULisboa (mlc@isa.ulisboa.pt)](https://www.cie
 
 Before the tutorial, please sign up for [Google Earth Engine](https://code.earthengine.google.com/).
 
-
 ---
 
 The tutorial will be *hands-on* using the GEE code editor. See [https://developers.google.com/earth-engine](https://developers.google.com/earth-engine) for code descriptions and examples that illustrate topics like finding and filtering data (spatially, temporally and spectrally), visualizing images, creating charts, creating new images and bands, screening images for clouds, and exporting data.
@@ -62,10 +61,7 @@ The sections of the Google Earth Engine documentation that are the most relevant
   
   <summary>Open session and copy Cloud Project name</summary>
 
-1. Go to https://code.earthengine.google.com 
-![Alt text](https://developers.google.com/static/earth-engine/images/Code_editor_diagram.png "Code editor"), choose account, and log in.
-
-2. In your session, copy your Cloud Project name in **Project info**: top right of the window.
+Go to https://code.earthengine.google.com, choose account, and log in. 
 
 </details>
 
@@ -74,7 +70,7 @@ The sections of the Google Earth Engine documentation that are the most relevant
   
   <summary>Access, filter and plot Sentinel-2 image collection</summary>
 
-For each script listed below, you should copy the script, paste it in the Code Editor and run it. You can then make changes to the script to test different parameter or instructions. You can save the script and give it a name in the Code Editor. You can also share it with the *Get link* button. For instance the first script is available here [GEE link](https://code.earthengine.google.com/ccb1c9392950c87058bd3bf2553fc09c?noload=true).
+For each script listed below, you can copy the script, paste it in the Code Editor and run it. You can then make changes to the script to test different parameter or instructions. You can save the script and give it a name in the Code Editor. You can also share it with the *Get link* button. For instance the first script is available here [GEE link](https://code.earthengine.google.com/ccb1c9392950c87058bd3bf2553fc09c?noload=true).
   
 The script accesses Sentinel-2, level 2A images and it filters by dates and by bounds: here, the region of interest `geometry` is a single point defined by its coordinates. All Sentinel-2 tiles that *intersect* the geometry are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection`. Note that sorting the collection by the property `CLOUDY_PIXEL_PERCENTAGE` should be applied last since it is computationally more demanding.
 
