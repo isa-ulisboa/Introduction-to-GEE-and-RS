@@ -56,22 +56,19 @@ The sections of the Google Earth Engine documentation that are the most relevant
 ---
 ## Tutorial topics
 
-### Open session in the Code Editor
-<details>
-  
-  <summary>Open session and copy Cloud Project name</summary>
+### 1. Open session in the Code Editor
 
-Go to https://code.earthengine.google.com, choose account, and log in. 
+- Go to https://code.earthengine.google.com, choose account and Cloud project, and log in. 
 
-</details>
-
-### Access image collection (Sentinel-2)
+### 2. Access image collection (Sentinel-2)
 <details>
   
   <summary>Access, filter and plot Sentinel-2 image collection</summary>
 
 For each script listed below, you can copy the script, paste it in the Code Editor and run it. You can then make changes to the script to test different parameter or instructions. You can save the script and give it a name in the Code Editor. You can also share it with the *Get link* button. For instance the first script is available here [GEE link](https://code.earthengine.google.com/ccb1c9392950c87058bd3bf2553fc09c?noload=true).
-  
+
+All available data sets can be found in the [Earth Engine Data Catalog](https://developers.google.com/earth-engine/datasets). Look for *Sentinel 2* for different nominal Sentinel-2 products and some derived ones. In particular, we will explore the product [COPERNICUS_S2_SR_HARMONIZED](https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED) and the derived product [Cloud Score+ S2_HARMONIZED V1](https://developers.google.com/earth-engine/datasets/catalog/GOOGLE_CLOUD_SCORE_PLUS_V1_S2_HARMONIZED).
+
 The script accesses Sentinel-2, level 2A images and it filters by dates and by bounds: here, the region of interest `geometry` is a single point defined by its coordinates. All Sentinel-2 tiles that *intersect* the geometry are selected. `CLOUDY_PIXEL_PERCENTAGE` is an `Image` property and can be used to sort or filter the `ImageCollection`. Note that sorting the collection by the property `CLOUDY_PIXEL_PERCENTAGE` should be applied last since it is computationally more demanding.
 
 ```
@@ -107,7 +104,7 @@ Map.addLayer(S2.first(), {bands: ['B8', 'B4', 'B3'], min: [0,0,0], max: [4500, 3
 </details>
 
 
-### Create simple (median) temporal composite; temporal reducer
+### 3. Create simple (median) temporal composite; understand what is a reduction
 <details>
   
   <summary> Select images with low cloud cover and combine them into a single image </summary>
@@ -150,7 +147,7 @@ In the example above, `median` is applied to all values of the image collection 
 
 </details>
 
-### Create a new band (e.g. NDVI) and add it to the image
+### 4. How to create a new band (e.g. NDVI) and add it to the image
 <details>
   
   <summary> Create an index with normalized difference; add index to image bands</summary>
@@ -170,7 +167,7 @@ image = image.addBands([ndvi])
 ```
 </details>
 
-### Create a basic temporal chart for NDVI 
+### 5. Create a basic temporal chart for NDVI (noisy chart with no preprocessing)
 
 <details>
   
@@ -226,7 +223,7 @@ print(chart);
 
 </details>
 
-### NDVI chart with cloud screening at the pixel level with Sentinel-2 QA band
+### 6. NDVI chart with cloud screening at the pixel level with Sentinel-2 QA band
 
 <details>
   
@@ -309,7 +306,7 @@ print(chart);
 
 </details>
 
-### NDVI chart with cloud screening at the pixel level with Cloud Score+ for Sentinel-2
+### 7. Improved NDVI chart with cloud screening at the pixel level with Cloud Score+ for Sentinel-2
 
 <details>
   
@@ -378,7 +375,7 @@ print(chart);
 
 </details>
 
-### Create NDVI charts for a set of locations
+### 8. Create NDVI charts for a set of locations
 <details>
   
   <summary> Multi-point NDVI charts with Cloud Score+ screening </summary>
@@ -480,7 +477,7 @@ print(chart);
 ```
 </details>
 
-### Export an image to Google Drive as a geotiff file
+### 9. Export an image to Google Drive as a geotiff file
 <details>
   
   <summary> Export.image.toDrive </summary>
