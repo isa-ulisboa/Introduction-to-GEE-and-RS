@@ -223,17 +223,18 @@ print(chart);
 
 </details>
 
-### 6. NDVI chart with cloud screening at the pixel level with Sentinel-2 QA band
+### 6. NDVI chart with cloud screening at the pixel level with Sentinel-2 SCL band
 
 <details>
   
-  <summary> Cloud screening with Sentinel-2 QA band </summary>
+  <summary> Cloud screening with Sentinel-2 SCL band </summary>
 
 * [GEE link](https://code.earthengine.google.com/b99f30aeb6f9b583c5330f1e389d3c38?noload=true)
 
 In this script, we filter clouds using two distinct strategies:
   - Using the property `CLOUDY_PIXEL_PERCENTAGE` for the whole tile: we select only tiles that have a cloud cover under a certain threshold we define;
-  - Using the built-in *band* `QA60` of the Sentinel-2 Surface Reflectance product; this allow us to mask individual pixels within an image independently of the cloud cover.
+  - Using the built-in *band* `SCL` of the Sentinel-2 Surface Reflectance product; this allow us to mask individual pixels within an image.
+  - To read a description of the SCL band and how to use it, see https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED#bands
   
 ```
 var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
