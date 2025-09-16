@@ -465,15 +465,24 @@ print(chart);
 ```
 </details>
 
-### 9. Create NDVI charts for a set of parcels, with one chart per land use
+### 9. Create NDVI charts for a set of parcels, upload shapefile to GEE
 <details>
   
-  <summary> Spatial reduction </summary>
+  <summary> GEE assets; Spatial reduction </summary>
 
-The first step that needs to be performed is to upload the shapefile that defines the parcels into GEE. This is done in tab **Assets**. We want to upload the shapefile with is zipped into `Vineyard_2castas.zip` available at (Vineyard_2castas.zip)
+The first step that needs to be performed is to upload the shapefile that defines the parcels into GEE. This is done in tab **Assets**. We want to upload the shapefile with is zipped into `Vineyard_2castas.zip` into **Assets** so we can have access to it in the Code Editor.
+1. Dowload `vineyard_2castas.zip` to your PC and unzip it
+2. In Earth Engine, use tab **Assets** to upload all the 5 files (shp, shx, ...) that make up the shapefile
+3. Open link https://code.earthengine.google.com/ec5c4a42ef91421b29ab8d934af0d9dd?noload=true
+4. Adapt first instruction `var castas = ee.FeatureCollection("projects/ee-my-mlc-math-isa-utl/assets/Vineyard_2castas");` to replace `ee-my-mlc-math-isa-utl` by your Cloud Project name.
+
+You should be able to run the script that is going to read your asset `Vineyard_2castas` and create the intended charts.
 
 ```
-// the ROI is now defined by Feature Collection 'castas'
+// to be adapted: use your Cloud Project name:
+var castas = ee.FeatureCollection("projects/ee-my-mlc-math-isa-utl/assets/Vineyard_2castas");
+
+// note that the ROI is defined by Feature Collection 'castas'
 
 // Cloud Score+ image collection. Note Cloud Score+ is produced from Sentinel-2
 // Level 1C data and can be applied to either L1C or L2A collections.
