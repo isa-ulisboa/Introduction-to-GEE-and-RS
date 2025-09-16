@@ -229,49 +229,37 @@ print(chart);
   
   <summary> Cloud screening with Sentinel-2 QA band </summary>
 
-* [GEE link](https://code.earthengine.google.com/5c3034511e023a92a6778f080114e6b0?noload=true)
+* [GEE link](https://code.earthengine.google.com/b99f30aeb6f9b583c5330f1e389d3c38?noload=true)
 
 In this script, we filter clouds using two distinct strategies:
   - Using the property `CLOUDY_PIXEL_PERCENTAGE` for the whole tile: we select only tiles that have a cloud cover under a certain threshold we define;
   - Using the built-in *band* `QA60` of the Sentinel-2 Surface Reflectance product; this allow us to mask individual pixels within an image independently of the cloud cover.
   
 ```
-// ROI: in this case it is a single point determined by longitude and latitude
 var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
 
-/**
- * Function to mask clouds using the Sentinel-2 QA band
- * @param {ee.Image} image Sentinel-2 image
- * @return {ee.Image} cloud masked Sentinel-2 image
- * https://developers.google.com/earth-engine/datasets/catalog/COPERNICUS_S2_SR_HARMONIZED
- */
-function maskS2clouds(image) {
-  var date = image.get('system:time_start'); // otherwise, this property is lost
-  var qa = image.select('QA60');
-
-  // Bits 10 and 11 are clouds and cirrus, respectively.
-  var cloudBitMask = 1 << 10;
-  var cirrusBitMask = 1 << 11;
-
-  // Both flags should be set to zero, indicating clear conditions.
-  var mask = qa.bitwiseAnd(cloudBitMask).eq(0)
-      .and(qa.bitwiseAnd(cirrusBitMask).eq(0));
-
-  return image.updateMask(mask).divide(10000).set('system:time_start', date);
+// Cloud Masking with the SCL Band (Level-2A Products); the idea is to mask out pixels classified as clouds,shadows, ...
+function maskClouds(image) {
+  var scl = image.select('SCL');
+  // Keep pixels classified as vegetation, water, bare soil, etc. (non-cloud)
+  var mask = scl.neq(3)  // Shadow
+           .and(scl.neq(8)) // Clouds
+           .and(scl.neq(9)) // Cirrus
+           .and(scl.neq(10)); // Snow
+  return image.updateMask(mask);
 }
-
 
 // access image collection, filter for location and range of dates
 // use built-in cloud screening (tile and pixel level)
 var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
       .filterBounds(geometry)
-      .filterDate('2022-06-01', '2025-08-30')
-      .select(['B8', 'B4','QA60'])
+      .filterDate('2022-06-01', '2025-09-30')
+      .select(['B8', 'B4','SCL'])
       // Pre-filter to get less cloudy granules.
       .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE',20))
-      .map(maskS2clouds);
+      .map(maskClouds);
 
-// center map; 
+// center map; 11 is the zoom level; 12 would zoom in further
 Map.centerObject(geometry, 16);
 
 // print to console
@@ -477,7 +465,82 @@ print(chart);
 ```
 </details>
 
-### 9. Export an image to Google Drive as a geotiff file
+### 9. Create NDVI charts for a set of parcels, with one chart per land use
+<details>
+  
+  <summary> Spatial reduction </summary>
+
+The first step that needs to be performed is to upload the shapefile that defines the parcels into GEE. This is done in tab **Assets**. We want to upload the shapefile with is zipped into `Vineyard_2castas.zip` available at (Vineyard_2castas.zip)
+
+```
+// the ROI is now defined by Feature Collection 'castas'
+
+// Cloud Score+ image collection. Note Cloud Score+ is produced from Sentinel-2
+// Level 1C data and can be applied to either L1C or L2A collections.
+var csPlus = ee.ImageCollection('GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED');
+// Use 'cs' or 'cs_cdf', depending on your use case; see docs for guidance.
+var QA_BAND = 'cs';
+// The threshold for masking; values between 0.50 and 0.65 generally work well.
+// Higher values will remove thin clouds, haze & cirrus shadows.
+var CLEAR_THRESHOLD = 0.60;
+
+// access image collection, filter for location and range of dates
+// link S2 collection with csPlus and update mask using QA_band
+// compute NDVI for every image from B4 and B8
+var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+      .filterDate('2022-01-01', '2025-08-30')
+      .filter(ee.Filter.lt('CLOUDY_PIXEL_PERCENTAGE', 30))
+      .filterBounds(castas)
+      .select(['B8', 'B4','B3','B2'])
+      .linkCollection(csPlus, [QA_BAND])
+      .map(function(img) {
+        return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+      })
+      .map(function(image) {
+                  var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+                  return image.addBands(ndvi);
+      });
+
+// center map; 16 is the zoom level; 17 would zoom in further
+Map.centerObject(castas, 16);
+
+// add true color composite layer to the map
+Map.addLayer(S2.first(), {bands: ['B4', 'B3', 'B2'], min: 0, max: 2500}, 'Sentinel-2 level 2A RGB==432');
+
+// print to console
+print(S2);
+
+Map.addLayer(castas, {color: 'white'})
+
+// apply negative buffer to all features (optional)
+var castas = castas.map(function(feature) {
+  return feature.buffer(-5);
+});
+
+// Compose chart per 'Casta'
+var chart = ui.Chart.image.seriesByRegion({
+  imageCollection: S2.select('NDVI'),
+  band: 'NDVI',
+  regions: castas,
+  reducer: ee.Reducer.mean(),
+  scale: 10,
+  seriesProperty: 'Casta',
+  xProperty: 'system:time_start'
+}).setOptions({
+  title: 'Mean NDVI by Casta',
+  hAxis: {title: 'Date'},
+  vAxis: {title: 'NDVI'},
+  lineWidth: 3,
+  colors: ['red', 'blue'],
+  interpolateNulls: true
+});
+
+print(chart);
+```
+
+</details>
+
+### 10. Export an image to Google Drive as a geotiff file
 <details>
   
   <summary> Export.image.toDrive </summary>
