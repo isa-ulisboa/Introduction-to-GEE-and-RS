@@ -1,6 +1,6 @@
 **UC Agricultura Digital**
 
-Tutorial: Brief Introduction to the Google Earth Engine (September, 15-22, 2025)
+Tutorial: Brief Introduction to the Google Earth Engine (September, 14-21, 2026)
 
 Main goal: learn how to use the GEE to create 10 meter resolution Sentinel-2 NDVI time series charts for chosen locations
 
@@ -16,9 +16,9 @@ The tutorial will be *hands-on* using the GEE code editor. See [https://develope
 
 <details>
   
-  <summary>Geospatial processing services</summary>
+  <summary>Geo-spatial processing services</summary>
   
-The GEE is one of several available **geospatial processing services** ofering a public data catalog, compute infrastructure and geospatial APIs:
+The GEE is one of several available **geo-spatial processing services** offering a public data catalog, compute infrastructure and geo-spatial APIs:
 1. Google Earth Engine (Google Cloud)
 2. Microsoft Planetary Computer (Azure)
 3. Amazon Web Services (AWS) GeoSpatial Services
@@ -31,7 +31,7 @@ The GEE is one of several available **geospatial processing services** ofering a
   
   <summary>Google Code Editor and documentation</summary>
 
-In this tutorial we will focus on the **GEE code editor**, which just requires a browser and do not require installing any other software in the local machine. Scripts are written in *javascript* in the code editor and personnal data can either be stored in the user's Earth Engine account (up to 250 Mb) or in Google drive.
+In this tutorial we will focus on the **GEE code editor**, which just requires a browser and do not require installing any other software in the local machine. Scripts are written in *javascript* in the code editor and personal data can either be stored in the user's Earth Engine account (up to 250 Mb) or in Google drive.
 
 The code editor is available at https://code.earthengine.google.com 
 ![Alt text](https://developers.google.com/static/earth-engine/images/Code_editor_diagram.png "Code editor")
