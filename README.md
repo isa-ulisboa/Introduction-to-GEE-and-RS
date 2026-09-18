@@ -550,7 +550,135 @@ print(chart);
 
 </details>
 
-### 10. Export an image to Google Drive as a geotiff file
+### 10. Visualize NDVI as a map over an area
+
+<details>
+
+  <summary> NDVI palette and legend, instead of just a point time series </summary>
+
+* [GEE link](https://code.earthengine.google.com/c206130d5ef30e240b80669a9e8b5cd5)
+
+So far NDVI has only been sampled at points or parcels and shown as a time chart. Here we compute NDVI for a cloud-free composite image and display it as a map with a color palette, from low (red) to high (green) greenness. This is a common way to inspect the spatial pattern of vegetation vigor over a field or region.
+
+```
+// ROI: in this case it is a single point determined by its longitude and latitude
+var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
+
+// Cloud Score+ image collection. Note Cloud Score+ is produced from Sentinel-2
+// Level 1C data and can be applied to either L1C or L2A collections.
+var csPlus = ee.ImageCollection('GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED');
+
+// Use 'cs' or 'cs_cdf', depending on your use case; see docs for guidance.
+var QA_BAND = 'cs';
+// The threshold for masking; values between 0.50 and 0.65 generally work well.
+var CLEAR_THRESHOLD = 0.60;
+
+// access image collection, filter for location and range of dates
+// link S2 collection with csPlus and update mask using QA_band
+// reduce to a single cloud-free composite with the median
+var S2clear = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+      .filterBounds(geometry)
+      .filterDate('2024-07-01', '2024-09-30')
+      .select(['B8', 'B4'])
+      .linkCollection(csPlus, [QA_BAND])
+      .map(function(img) {
+        return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+      })
+      .median();
+
+// compute NDVI for the composite image
+var ndvi = S2clear.normalizedDifference(['B8', 'B4']).rename('NDVI');
+
+// center map over a 1 km buffer around the point
+Map.centerObject(geometry.buffer(1000), 15);
+
+// visualization parameters: color palette from red (low NDVI) to green (high NDVI)
+var ndviParams = {min: 0, max: 0.8, palette: ['red', 'yellow', 'green']};
+
+// add NDVI layer to the map, clipped to the area of interest
+Map.addLayer(ndvi.clip(geometry.buffer(1000)), ndviParams, 'NDVI, Jul-Sep 2024');
+
+// print to console
+print(ndvi);
+```
+
+</details>
+
+### 11. Export the NDVI time series as a table (CSV) to Google Drive
+
+<details>
+
+  <summary> Export.table.toDrive; from chart to data you can take home </summary>
+
+* [GEE link](https://code.earthengine.google.com/18dcc18d9240afbe53bb1cfeed7cf6b7)
+
+The charts created so far (topics 5-8) only show NDVI values inside the Code Editor with `print(chart)`. Often you want the underlying values as a table, to analyze later in Excel, Python or R. The idea is to reduce the NDVI band of each image in the collection to a single mean value over the point (or parcel), attach the image date, and export the resulting table as a CSV file.
+
+```
+// ROI: in this case it is a single point determined by its longitude and latitude
+var geometry = ee.Geometry.Point([-9.18498, 38.70708]);
+
+// Cloud Score+ image collection. Note Cloud Score+ is produced from Sentinel-2
+// Level 1C data and can be applied to either L1C or L2A collections.
+var csPlus = ee.ImageCollection('GOOGLE/CLOUD_SCORE_PLUS/V1/S2_HARMONIZED');
+
+// Use 'cs' or 'cs_cdf', depending on your use case; see docs for guidance.
+var QA_BAND = 'cs';
+// The threshold for masking; values between 0.50 and 0.65 generally work well.
+var CLEAR_THRESHOLD = 0.60;
+
+// access image collection, filter for location and range of dates
+// link S2 collection with csPlus and update mask using QA_band
+var S2 = ee.ImageCollection('COPERNICUS/S2_SR_HARMONIZED')
+      .filterBounds(geometry)
+      .filterDate('2022-06-01', '2024-09-30')
+      .select(['B8', 'B4'])
+      .linkCollection(csPlus, [QA_BAND])
+      .map(function(img) {
+        return img.updateMask(img.select(QA_BAND).gte(CLEAR_THRESHOLD));
+      });
+
+// Function that adds an NDVI band to an image with B4 and B8
+var add_ndvi_to_s2 = function(image) {
+  var ndvi = image.normalizedDifference(['B8', 'B4']).rename('NDVI');
+  return image.addBands([ndvi]);
+};
+
+// Add NDVI to all the images of the collection
+var S2 = S2.map(add_ndvi_to_s2);
+
+// For each image, reduce the NDVI band over the point and keep the date as a property
+var ndviValues = S2.select('NDVI').map(function(image) {
+  var stats = image.reduceRegion({
+    reducer: ee.Reducer.mean(),
+    geometry: geometry,
+    scale: 10
+  });
+  return ee.Feature(null, {
+    'date': image.date().format('YYYY-MM-dd'),
+    'NDVI': stats.get('NDVI')
+  });
+});
+
+// Remove images with no valid NDVI value (e.g. fully masked by clouds)
+var ndviTable = ee.FeatureCollection(ndviValues).filter(ee.Filter.notNull(['NDVI']));
+
+print(ndviTable);
+
+// export table as CSV to Google Drive
+Export.table.toDrive({
+  collection: ndviTable,
+  description: 'NDVI_timeseries',
+  folder: 'agricultura_digital',
+  fileFormat: 'CSV'
+});
+```
+
+Note: as with `Export.image.toDrive` in the next topic, the export task needs to be started manually from the **Tasks** tab in the Code Editor.
+
+</details>
+
+### 12. Export an image to Google Drive as a geotiff file
 <details>
   
   <summary> Export.image.toDrive </summary>
